@@ -1,0 +1,27 @@
+  <h2>Entries</h2>
+
+  <table>
+    <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+      <th>URI</th>
+      <th class="tableHeaderLast">Version</th>
+    <tr>
+    </thead>
+    <tbody>
+    <% @entries.each do |entry| %>
+    <tr>
+      <td><%= entry.type_name %></td>
+      <td><%= entry.description %></td>
+      <td><%= entry.uri %></td>
+      <td><%= entry.version %></td>
+    </tr>
+    <% end %>
+    <% if @entries.empty? %>
+    <tr>
+      <td colspan="4">No entries are registered.</td>
+    </tr>
+    <% end %>
+    </tbody>
+  </table>
