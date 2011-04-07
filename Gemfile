@@ -14,7 +14,6 @@ gem 'rest-client'
 
 # testing
 gem 'rspec', '=2.2.0'
-gem 'rcov'
 gem 'rack-test', '=0.5.6'
 gem 'ruby-debug-base19x'
 gem 'ruby-debug-ide'
