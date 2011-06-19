@@ -111,12 +111,6 @@ module CgLookupService
       settings.db_lock.synchronize do
         begin
           attributes = JSON.parse(request.body.read)
-          if not (attributes.key?("type_name") && attributes.key?("version") &&
-              attributes.key?("uri"))
-            raise ArgumentError, "Missing attribute: type_name, version, and " + \
-              "uri are required."
-          end
-          # TODO: Check for unknown attributes
           entry = Entry.find_by_type_name_and_version_and_uri(
               attributes["type_name"], attributes["version"],
               attributes["uri"])
@@ -131,7 +125,7 @@ module CgLookupService
             if entry.valid?
               entry.to_json
             else
-              halt [404, entry.errors.to_json]
+              halt [422, entry.errors.to_json]
             end
           end
         rescue => e

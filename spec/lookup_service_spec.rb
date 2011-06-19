@@ -67,21 +67,21 @@ describe "lookup service" do
         :version => "1"}
 
       post '/v1/entries', attributes.to_json
-      last_response.status.should == 500
+      last_response.status.should == 422
 
       attributes = {
         :type_name => "lookup",
         :uri => "http://localhost:3000"}
 
       post '/v1/entries', attributes.to_json
-      last_response.status.should == 500
+      last_response.status.should == 422
 
       attributes = {
         :version => "1",
         :uri => "http://localhost:3000"}
 
       post '/v1/entries', attributes.to_json
-      last_response.status.should == 500
+      last_response.status.should == 422
     end
 
     it "should renew an already registered entry" do
