@@ -14,4 +14,4 @@ ruby lookup_service.rb
 rackup
 
 Documentation:
-http://localhost:4567/v1/doc
+http://localhost:5000/v1/doc
