@@ -12,7 +12,7 @@ module CgLookupService
     configure do
       port_arg_idx = ARGV.index("-p")
       port_arg = ARGV[port_arg_idx+1] unless port_arg_idx == nil
-      set :port, port_arg || 4567
+      set :port, port_arg || 5000
     end
 
     # Configure database
@@ -129,6 +129,7 @@ module CgLookupService
             end
           end
         rescue => e
+          puts e.message
           halt [500, e.message.to_json]
         end
       end
