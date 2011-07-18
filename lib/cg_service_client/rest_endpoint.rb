@@ -36,11 +36,11 @@ module CgServiceClient
         end
 
       end
-    end
 
-    hydra = Typhoeus::Hydra.new
-    hydra.queue(request)
-    hydra.run
+      hydra = Typhoeus::Hydra.new
+      hydra.queue(request)
+      hydra.run
+    end
   end
 
 end
