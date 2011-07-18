@@ -7,5 +7,6 @@ gem 'typhoeus', '>=0.2.4'
 
 require 'cg_service_client/exceptions.rb'
 require 'cg_service_client/response_handlers'
+require 'cg_service_client/rest_endpoint'
 
 
