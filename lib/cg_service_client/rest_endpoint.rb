@@ -21,7 +21,7 @@ module CgServiceClient
     def run_synchronous_typhoeus_request(request)
       request.on_complete do |response|
         if response.success?
-          yield
+          yield response
         elsif response.code >= 400 && response.code < 500
           raise CgServiceClient::Exceptions::ClientError.new(response.code, response.status_message), "Client error #{response.code}: #{response.body}."
         elsif response.code >= 500
