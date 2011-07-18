@@ -1,8 +1,9 @@
 require 'rubygems'
 require 'rspec/core/rake_task'
 
-require(File.dirname(__FILE__) +
-                  '/lib/cg_service_client.rb')
+$: << File.expand_path(File.dirname(__FILE__) + '../../lib')
+
+require 'cg_service_client'
 
 desc 'Default: run specs.'
 task :default => :spec

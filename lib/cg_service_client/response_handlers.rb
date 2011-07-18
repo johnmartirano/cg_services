@@ -1,7 +1,3 @@
-require 'exceptions'
-require 'active_support'
-require 'typhoeus'
-
 module CgServiceClient
   module ResponseHandlers
     def handle_typhoeus_response(response, request_url)
