@@ -43,6 +43,4 @@ module CgServiceClient
     hydra.run
   end
 
-
-end
 end
