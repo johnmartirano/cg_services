@@ -2,7 +2,7 @@
 # it can be removed.
 require 'rubygems'
 #gem 'activemodel', '>=3.0.0'
-#gem 'typhoeus', '>=0.2.4'
+gem 'typhoeus', '>=0.2.4'
 
 
 require 'cg_service_client/exceptions.rb'
