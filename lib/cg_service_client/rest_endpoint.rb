@@ -2,6 +2,8 @@ require 'typhoeus'
 
 module CgServiceClient
   class RestEndpoint
+    REQEUST_TIMEOUT = 5000 # milliseconds
+
     attr_reader :uri, :version
 
     def initialize(uri, version)
