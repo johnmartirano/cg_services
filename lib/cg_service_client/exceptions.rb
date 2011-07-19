@@ -12,13 +12,13 @@ module CgServiceClient
       # 4xx level errors
     class ClientError < HttpError
       def initialize(http_code, status_message)
-        super http_code, status_message
+        super
       end
     end
       # 5xx level errors
     class ServerError < HttpError
       def initialize(http_code, status_message)
-        super http_code, status_message
+        super
       end
     end
 
@@ -33,7 +33,7 @@ module CgServiceClient
     end
     class TimeoutError < ConnectionError
       def initialize(error_code, error_message)
-        super(error_code, error_message)
+        super
       end
     end
   end
