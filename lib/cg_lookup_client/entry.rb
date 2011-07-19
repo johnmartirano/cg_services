@@ -5,7 +5,7 @@ require 'active_model'
 require 'active_support'
 require 'active_support/hash_with_indifferent_access'
 
-module CgLookupService
+module CgLookupClient
 
   # The client side of the CG Lookup Service. Represents a registered Entry
   # within a Lookup Service instance (endpoint). At least one endpoint must
@@ -45,7 +45,7 @@ module CgLookupService
       # registered, one after another. Currently, only version 1 endpoints are
       # supported. Default is a version 1 endpoint running on localhost:5000.
       def configure_endpoint(endpoint= \
-          CgLookupService::RestEndpoint.new("http://localhost:5000/", "1"))
+          CgLookupClient::RestEndpoint.new("http://localhost:5000/", "1"))
         if !supported_endpoint_version?(endpoint.version)
           raise UnsupportedEndpointVersionError, \
           "Version #{endpoint.version} endpoints are not supported."
@@ -129,7 +129,7 @@ module CgLookupService
       if valid?
         Entry.entries_monitor.synchronize do
           Entry.entries[self] = callback
-          registered = CgLookupService::Entry.register_with_all_endpoints(self)
+          registered = CgLookupClient::Entry.register_with_all_endpoints(self)
         end
       end
       registered
@@ -253,7 +253,7 @@ module CgLookupService
 
   end
 
-  CgLookupService::Entry.start_renewal_thread
+  CgLookupClient::Entry.start_renewal_thread
 
     # Error for when user attempts to configure an unsupported endpoint version.
   class UnsupportedEndpointVersionError < StandardError;

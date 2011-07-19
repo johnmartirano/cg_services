@@ -1,7 +1,7 @@
 require 'rest-client'
 require 'active_record'
 
-module CgLookupService
+module CgLookupClient
   class RestEndpoint
 
     attr_reader :uri, :version
@@ -28,7 +28,7 @@ module CgLookupService
             |response, request, result|
           case response.code
             when 200
-              registered = CgLookupService::Entry.new.from_json(response.body)
+              registered = CgLookupClient::Entry.new.from_json(response.body)
               yield(registered.id, true, result.message)
             else
               yield(nil, false, ActiveSupport::JSON.decode(result.body))
@@ -50,7 +50,7 @@ module CgLookupService
               entries = ActiveSupport::JSON.decode(response.body)
               entries.each do |entry_attributes|
                 lookup_result = Hash.new
-                lookup_result[:entry] = CgLookupService::Entry.new(entry_attributes)
+                lookup_result[:entry] = CgLookupClient::Entry.new(entry_attributes)
                 lookup_result[:message] = result.message
                 lookup_results << lookup_result
               end
