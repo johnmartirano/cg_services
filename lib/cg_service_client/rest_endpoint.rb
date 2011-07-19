@@ -18,6 +18,20 @@ module CgServiceClient
       @uri + 'v' + @version + "/"
     end
 
+    def eql?(object)
+      if object.equal?(self)
+        return true
+      elsif !self.class.equal?(object.class)
+        return false
+      end
+
+      object.uri_with_version.eql?(uri_with_version)
+    end
+
+    def hash
+      uri_with_version.hash
+    end
+
     protected
 
     def run_typhoeus_request(request)
