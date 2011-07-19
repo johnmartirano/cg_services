@@ -18,7 +18,7 @@ module CgServiceClient
 
     protected
 
-    def run_synchronous_typhoeus_request(request)
+    def run_typhoeus_request(request)
       request.on_complete do |response|
         if response.success?
           yield response
