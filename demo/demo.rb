@@ -1,7 +1,6 @@
 #!/usr/bin/env ruby
 
 $: << File.expand_path(File.dirname(__FILE__) + '../../lib')
-# $: << File.expand_path(File.dirname(__FILE__) + '../../../lib')
 
 require 'cg_lookup_client'
 
@@ -49,7 +48,7 @@ def main
 
   puts "\n\nLooking up Entries of type Notification."
   result = CgLookupClient::Entry.lookup("Notification","1")
-  puts "Got " + result["entry"].to_s
+  puts "Got " + result[:entry].to_s
 
 
   puts "\n\nConfiguring a second endpoint on port 5001..."
