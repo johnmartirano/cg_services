@@ -12,7 +12,7 @@ Gem::Specification.new do |s|
   s.summary     = ""
 
   s.add_dependency "rake", "0.8.7"
-  s.add_dependency "rspec", ">= 2.6.0"
+  s.add_dependency "rspec", "~> 2.5.0"
   s.add_dependency "cg_lookup_client", ">= 0.5.0"
   s.add_dependency "typhoeus", ">= 0.2.4"
 
