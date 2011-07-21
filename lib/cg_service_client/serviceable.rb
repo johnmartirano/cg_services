@@ -26,7 +26,7 @@ module CgServiceClient
     Thread.new do
       loop do
         sleep ENDPOINT_FLUSH_INTERVAL_IN_SEC
-        @endpoint = find_service_version
+        @endpoint = find_service_endpoint
       end
     end
 
