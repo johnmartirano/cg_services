@@ -1,11 +1,15 @@
 require 'cg_lookup_client'
 
 module CgServiceClient
+  # This mixin provides convenience methods for instantiating and renewing service endpoints.
+  # To use this mixin, include the following at the beginning of your class:
+  # extend CgServiceClient::Serviceable
   module Serviceable
     ENDPOINT_FLUSH_INTERVAL_IN_SEC = 60
 
     attr_reader :endpoint
 
+    # Looks up the given service and instantiates the given RestEndpoint.
     def uses_service(service_name, service_version, endpoint_class)
       @service_name = service_name
       @service_version = service_version
@@ -22,7 +26,7 @@ module CgServiceClient
       end
     end
 
-      # This thread periodically clears out the endpoint reference, thereby forcing it to be resolved again.
+      # This thread periodically refreshes the endpoint.
     Thread.new do
       loop do
         sleep ENDPOINT_FLUSH_INTERVAL_IN_SEC
