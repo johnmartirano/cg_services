@@ -4,7 +4,7 @@ module CgServiceClient
   # This mixin provides convenience methods for instantiating and renewing service endpoints.
   # To use this mixin, include the following at the beginning of your class:
   # extend CgServiceClient::Serviceable
-  # Then, in the initializer, call CgServiceClient::Serviceable.use_service
+  # Then, in the initializer, call YourClientClassName.use_service
   module Serviceable
     ENDPOINT_FLUSH_INTERVAL_IN_SEC = 60
 
