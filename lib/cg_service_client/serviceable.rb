@@ -4,13 +4,17 @@ module CgServiceClient
   # This mixin provides convenience methods for instantiating and renewing service endpoints.
   # To use this mixin, include the following at the beginning of your class:
   # extend CgServiceClient::Serviceable
+  # Then, in the initializer, call CgServiceClient::Serviceable.use_service
   module Serviceable
     ENDPOINT_FLUSH_INTERVAL_IN_SEC = 60
 
     attr_reader :endpoint
 
     # Looks up the given service and instantiates the given RestEndpoint.
-    def uses_service(service_name, service_version, endpoint_class)
+    # Makes available a class instance variable, @endpoint, that can be
+    # used to interact with the endpoint. The endpoint will be periodically
+    # refreshed.
+    def use_service(service_name, service_version, endpoint_class)
       @service_name = service_name
       @service_version = service_version
       @endpoint_class = endpoint_class
