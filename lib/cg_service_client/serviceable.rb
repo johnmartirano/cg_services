@@ -18,7 +18,6 @@ module CgServiceClient
       @service_name = service_name
       @service_version = service_version
       @endpoint_class = endpoint_class
-      @endpoint = find_service_endpoint
     end
 
     def find_service_endpoint
@@ -30,7 +29,13 @@ module CgServiceClient
       end
     end
 
-      # This thread periodically refreshes the endpoint.
+    def ensure_configured
+      if @endpoint = nil
+        @endpoint = find_service_endpoint
+      end
+    end
+
+      # This thread periodically refreshes the endpoint
     Thread.new do
       loop do
         sleep ENDPOINT_FLUSH_INTERVAL_IN_SEC
@@ -40,5 +45,6 @@ module CgServiceClient
 
     class ServiceUnavailableError < StandardError;
     end
+
   end
 end
