@@ -14,7 +14,7 @@ module CgServiceClient
     # Makes available a class instance variable, @endpoint, that can be
     # used to interact with the endpoint. The endpoint will be periodically
     # refreshed.
-    def use_service(service_name, service_version, endpoint_class)
+    def uses_service(service_name, service_version, endpoint_class)
       @service_name = service_name
       @service_version = service_version
       @endpoint_class = endpoint_class
