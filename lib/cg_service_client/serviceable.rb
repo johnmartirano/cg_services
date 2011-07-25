@@ -30,7 +30,7 @@ module CgServiceClient
     end
 
     def ensure_configured
-      if @endpoint = nil
+      if @endpoint == nil
         @endpoint = find_service_endpoint
       end
     end
