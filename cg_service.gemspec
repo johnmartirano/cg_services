@@ -13,6 +13,11 @@ Gem::Specification.new do |s|
 
   s.add_dependency 'activerecord', '>= 3.0.6'
   s.add_dependency 'pg'
+  s.add_dependency 'sinatra', '>= 1.2.1'
+  s.add_dependency 'sinatra-reloader'
+  s.add_dependency 'thin', '=1.2.8'
+  s.add_dependency 'json', '=1.4.6'
+  s.add_dependency 'cg_lookup_client'
 
   s.files        = Dir.glob("{lib,spec}/**/*")
 
