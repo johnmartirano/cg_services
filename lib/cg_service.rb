@@ -42,10 +42,10 @@ module CgService
     end
 
 	# Configure service
-    def configure_service(service_name)
+    def configure_service(service_file,service_name)
       configure do
         app_config = YAML.load_file("config/service.yml")
-        set :app_file, __FILE__
+        set :app_file, service_file
         set :lookup_service_uri => app_config["lookup_service_uri"]
         set :lookup_service_version => app_config["lookup_service_version"]
         set :application_service_host => app_config["application_service_host"]
