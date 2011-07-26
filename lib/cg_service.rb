@@ -40,6 +40,50 @@ module CgService
         ActiveRecord::Base.time_zone_aware_attributes = true
       end
     end
+
+	# Configure service
+    def configure_service(service_name)
+      configure do
+        app_config = YAML.load_file("config/service.yml")
+        set :app_file, __FILE__
+        set :lookup_service_uri => app_config["lookup_service_uri"]
+        set :lookup_service_version => app_config["lookup_service_version"]
+        set :application_service_host => app_config["application_service_host"]
+        set :application_service_scheme => app_config["application_service_scheme"]
+        set :application_service_uri => \
+                settings.application_service_scheme + "://"  \
+              + settings.application_service_host + ":"  \
+              + settings.port.to_s + "/"
+  
+        endpoint =
+            ::CgLookupClient::RestEndpoint.new(settings.lookup_service_uri, settings.lookup_service_version)
+        CgLookupClient::Entry.configure_endpoint(endpoint)
+        service_entry = CgLookupClient::Entry.new(
+            {:type_name=>service_name,
+             :description=>"Sinatra #{service_name} Service",
+             :uri=>settings.application_service_uri,
+             :version=>"1"})
+  
+        # The registration thread will warn when renewal fails.
+        # TODO: If renewal fails 3 or more times we should notify an admin.
+        fail_count=0
+        service_entry.register do |status|
+          if !status[:success]
+            fail_count+=1
+            puts status[:message] + " --  Failed #{fail_count} times to connect to CgLookupService endpoint #{status[:endpoint]}."
+          else
+            fail_count=0
+            puts status[:message] + " --  Successfully renewed with CgLookupService endpoint #{status[:endpoint]}."
+          end
+          if fail_count >= 3
+            puts "TODO: An admin should be notified at this point."
+          end
+        end
+  
+        puts "|| CG #{service_name} Service is starting up..."
+  
+      end
+    end
   end
 
 end
