@@ -26,8 +26,9 @@ module CgService
       end
     end
 
-	# Configure database
-    def configure_db(db_file)
+	# Configure database to environment based on:
+	# checks for -e flag, then ENV["SINATRA_ENV"], then defaults to development
+    def configure_db(db_file,env)
       configure do
         env_arg_idx = ARGV.index("-e")
         env_arg = ARGV[env_arg_idx+1] unless env_arg_idx == nil
@@ -84,7 +85,7 @@ module CgService
       end
     end
 
-	# Configure sinatra reloader for a particular environment, defaults to development.
+    # Configure sinatra reloader for a particular environment, defaults to development.
     def configure_sinatra_reloader(enviro=:development)
       configure(enviro) do
         begin
