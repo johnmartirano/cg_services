@@ -115,7 +115,7 @@ namespace :db do
 
   desc 'Load the seed data from db/seeds.rb'
   task :seed => :configure_connection do
-    seed_file = File.join(File.dirname(@service_file), 'db', 'seeds.rb')
+    seed_file = File.join('db', 'seeds.rb')
     load(seed_file) if File.exist?(seed_file)
   end
 

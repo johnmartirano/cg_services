@@ -6,8 +6,7 @@ module CgService
 
   module RakeLoader
     class << self
-      def load_tasks!(service_file)
-	    @service_file=service_file
+      def load_tasks!
         require 'rake'
         [:db].each do |file|
           load(File.join(File.dirname(__FILE__), "tasks/#{file.to_s}.rake"))
@@ -18,6 +17,7 @@ module CgService
 
 
   module Configure
+
     # Configure port
     def configure_port(port_number)
       configure do
@@ -29,7 +29,7 @@ module CgService
 
 	# Configure database to environment based on:
 	# checks for -e flag, then ENV["SINATRA_ENV"], then defaults to development
-    def configure_db(db_file,env)
+    def configure_db(db_file)
       configure do
         env_arg_idx = ARGV.index("-e")
         env_arg = ARGV[env_arg_idx+1] unless env_arg_idx == nil
