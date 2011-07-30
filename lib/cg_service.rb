@@ -6,7 +6,7 @@ module CgService
 
   module RakeLoader
     class << self
-      def load_tasks(service_file)!
+      def load_tasks!(service_file)
 	    @service_file=service_file
         require 'rake'
         [:db].each do |file|
