@@ -1,2 +1,1 @@
-rvm 1.9.2
-rvm gemset use cg_lookup_service
+rvm use 1.9.2-p0@cg_lookup_service
