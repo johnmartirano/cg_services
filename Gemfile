@@ -1,22 +1,24 @@
 source 'http://rubygems.org'
 source 'http://build.commongroundpublishing.com/gems'
 
-
 # service
-gem 'activerecord', '~>3.0.6'
-gem 'cg_service', '>=0.5.4'
+gem 'activerecord', '>= 3.0.6'
 gem 'pg'
-gem 'sqlite3-ruby', '=1.2.5', :require => 'sqlite3'
-gem 'sinatra', '=1.1.3'
-gem 'sinatra-reloader', '0.5.0'
-gem 'thin', '~>1.2.8'
-gem 'json', '~>1.4.6'
+gem 'sinatra', '>= 1.2.1'
+gem 'sinatra-reloader'#, '0.5.0'
+gem 'thin', '=1.2.8'
+gem 'json', '=1.4.6'
+gem 'cg_service', '>=0.5.4'
+#gem 'cg_service', :path => '../cg_service'
+gem 'cg_lookup_client', '>=0.5.0'
+
 
 
 group :development, :test do
   gem 'tux'
   gem 'cg_capistrano'
   gem 'capistrano'
+  gem 'sqlite3', :require => 'sqlite3'
 end
 
 group :test do
