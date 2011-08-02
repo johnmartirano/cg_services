@@ -2,7 +2,7 @@
 
 Installing:
 Install RVM
-Run: rvm install 1.9.2p0
+Run: rvm install 1.9.2-p0
 Run: rvm gemset create cg_lookup_service
 Run: rvm use 1.9.2p0@cg_lookup_service
 Run: gem install bundler
