@@ -1,5 +1,5 @@
 require 'rubygems'
-gem 'activerecord', "=3.0.3"
+gem 'activerecord', '>= 3.0.6'
 require 'active_record'
 require 'yaml'
 require 'logger'
