@@ -11,7 +11,6 @@ gem 'json', '=1.4.6'
 gem 'cg_service', '>=0.5.4'
 #gem 'cg_service', :path => '../cg_service'
 gem 'cg_lookup_client', '>=0.5.0'
-gem 'sqlite3', :require => 'sqlite3'
 
 
 
@@ -19,6 +18,8 @@ group :development, :test do
   gem 'tux'
   gem 'cg_capistrano'
   gem 'capistrano'
+  gem 'sqlite3', :require => 'sqlite3'
+
 end
 
 group :test do
