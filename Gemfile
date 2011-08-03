@@ -12,9 +12,6 @@ gem 'cg_service', '>=0.5.4'
 gem 'cg_lookup_client', '>=0.5.0'
 gem 'sqlite3-ruby', '=1.2.5', :require => 'sqlite3'
 
-
-
-
 group :development, :test do
   gem 'tux'
   gem 'cg_capistrano'
