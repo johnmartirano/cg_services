@@ -14,7 +14,7 @@ gem 'sqlite3-ruby', '=1.2.5', :require => 'sqlite3'
 
 group :development, :test do
   gem 'tux'
-  gem 'cg_capistrano'
+  gem 'cg_capistrano', '~>0.1.33'
   gem 'capistrano'
 end
 
