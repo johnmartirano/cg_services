@@ -3,7 +3,6 @@ gem 'activerecord', '>= 3.0.6'
 require 'active_record'
 require 'yaml'
 require 'logger'
-require 'sqlite3'
 require 'rspec/core/rake_task'
 
 desc 'Default: run specs.'
