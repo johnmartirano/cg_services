@@ -4,7 +4,7 @@ require 'erb'
 require 'active_record'
 require 'sinatra/base'
 
-require "#{File.dirname(__FILE__)}/models/entry"
+require "#{File.expand_path(File.dirname(__FILE__))}/models/entry"
 
 module CgLookupService
   class App < Sinatra::Base
@@ -20,14 +20,16 @@ module CgLookupService
       env_arg_idx = ARGV.index("-e")
       env_arg = ARGV[env_arg_idx+1] unless env_arg_idx == nil
       env = env_arg || ENV["SINATRA_ENV"] || "development"
-      databases = YAML.load_file("config/database.yml")
+      databases = YAML.load_file(File.expand_path(File.dirname(__FILE__) + "/config/database.yml"))
+      # databases = YAML.load_file("config/database.yml")
       ActiveRecord::Base.establish_connection(databases[env])
       ActiveRecord::Base.include_root_in_json = false
     end
 
     # Configure expiration thread
     configure do
-      app_config = YAML.load_file("config/service.yml")
+      app_config = YAML.load_file(File.dirname(__FILE__) + "/config/service.yml")
+      #app_config = YAML.load_file("config/service.yml")
       set :app_file, __FILE__
       set :db_lock, Mutex.new
       set :lease_time_in_sec => app_config["lease_time_in_sec"]
