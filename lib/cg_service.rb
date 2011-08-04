@@ -45,8 +45,8 @@ module CgService
 	# Configure service
     def configure_service(service_file,service_name)
       configure do
-        app_config = YAML.load_file("config/service.yml")
-        set :app_file, service_file
+        app_config = YAML.load_file(File.dirname(service_file) + "/config/service.yml")
+        set :app_file, File.basename(service_file)
         set :lookup_service_uri => app_config["lookup_service_uri"]
         set :lookup_service_version => app_config["lookup_service_version"]
         set :application_service_host => app_config["application_service_host"]
@@ -56,9 +56,9 @@ module CgService
               + settings.application_service_host + ":"  \
               + settings.port.to_s + "/"
   
-        endpoint =
-            ::CgLookupClient::RestEndpoint.new(settings.lookup_service_uri, settings.lookup_service_version)
+        endpoint = CgLookupClient::RestEndpoint.new(settings.lookup_service_uri, settings.lookup_service_version)
         CgLookupClient::Entry.configure_endpoint(endpoint)
+
         service_entry = CgLookupClient::Entry.new(
             {:type_name=>service_name,
              :description=>"Sinatra #{service_name} Service",
