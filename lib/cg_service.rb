@@ -1,6 +1,6 @@
 require 'active_record'
 require 'sinatra/base'
-require 'cg_lookup_client'
+require 'yaml'
 
 module CgService
 
@@ -13,22 +13,82 @@ module CgService
         end
       end
     end
-  end 
+  end
 
+  # Start a thread that will register with a lookup service according
+  # to +host+, +port+, and various keys in +config+, which may be a
+  # Hash or a string filename that will be loaded using YAML.load_file
+  def self.start_registration_thread(host, port, config)
+    config = YAML.load_file(config) if config.kind_of? String
+
+    # Important to not require 'cg_lookup_client' until we're ready to
+    # start the registration thread.  This must be done after rackup
+    # daemonized so the registration thread runs in the child rather
+    # than dying in the parent.
+    require 'cg_lookup_client' # starts registration thread
+
+    scheme = config['scheme'] || 'http'
+    url = "#{scheme}://#{host}:#{port}/"
+    name = config['name'] || 'Unknown'
+    description = config['description'] || "#{name} Service"
+    version = config['version'] || '1'
+    lookup_service_uri = config['lookup_service_uri'] || 'http://localhost:5000/'
+    lookup_service_version = config['lookup_service_version'] || '1'
+
+    endpoint = CgLookupClient::RestEndpoint.new(lookup_service_uri,
+                                                lookup_service_version)
+    CgLookupClient::Entry.configure_endpoint(endpoint)
+    
+    entry = CgLookupClient::Entry.new(:type_name => name,
+                                      :description => description,
+                                      :uri => url,
+                                      :version => version)
+
+    # The registration thread will warn when renewal fails.
+    # TODO: If renewal fails 3 or more times we should notify an
+    # admin.
+    fail_count = 0
+    entry.register do |status|
+      if !status[:success]
+        fail_count+=1
+        puts status[:message] + " --  Failed #{fail_count} times to connect to CgLookupService endpoint #{status[:endpoint]}."
+      else
+        fail_count=0
+        puts status[:message] + " --  Successfully renewed with CgLookupService endpoint #{status[:endpoint]}."
+      end
+      if fail_count >= 3
+        puts "TODO: An admin should be notified at this point."
+      end
+    end
+    
+    puts "|| CG #{name} Service is starting up on #{url} ..."
+  end
 
   module Configure
 
-    # Configure port
+    def config
+      @config ||= YAML.load_file("config/service.yml")
+    end
+
+    # Configure port.  This will only apply if the service is executed
+    # directly (i.e. not using rackup or unicorn).
     def configure_port(port_number)
       configure do
-        port_arg_idx = ARGV.index("-p")
-        port_arg = ARGV[port_arg_idx+1] unless port_arg_idx == nil
-        set :port, port_arg || port_number
+        set :port, args_port(port_number)
       end
     end
 
-	# Configure database to environment based on:
-	# checks for -e flag, then ENV["SINATRA_ENV"], then defaults to development
+    # Get the port from ARGV or +default_port+. This will only apply
+    # if the service is executed directly (i.e. not using rackup or
+    # unicorn).
+    def args_port(default_port)
+      port_arg_idx = ARGV.index("-p")
+      port_arg = ARGV[port_arg_idx+1] unless port_arg_idx == nil
+      port_arg || default_port
+    end
+
+    # Configure database to environment based on:
+    # checks for -e flag, then ENV["SINATRA_ENV"], then defaults to development
     def configure_db(db_file)
       configure do
         env_arg_idx = ARGV.index("-e")
@@ -42,50 +102,6 @@ module CgService
       end
     end
 
-	# Configure service
-    def configure_service(service_file,service_name)
-      configure do
-        app_config = YAML.load_file(File.dirname(service_file) + "/config/service.yml")
-        set :app_file, File.basename(service_file)
-        set :lookup_service_uri => app_config["lookup_service_uri"]
-        set :lookup_service_version => app_config["lookup_service_version"]
-        set :application_service_host => app_config["application_service_host"]
-        set :application_service_scheme => app_config["application_service_scheme"]
-        set :application_service_uri => \
-                settings.application_service_scheme + "://"  \
-              + settings.application_service_host + ":"  \
-              + settings.port.to_s + "/"
-  
-        endpoint = CgLookupClient::RestEndpoint.new(settings.lookup_service_uri, settings.lookup_service_version)
-        CgLookupClient::Entry.configure_endpoint(endpoint)
-
-        service_entry = CgLookupClient::Entry.new(
-            {:type_name=>service_name,
-             :description=>"Sinatra #{service_name} Service",
-             :uri=>settings.application_service_uri,
-             :version=>"1"})
-  
-        # The registration thread will warn when renewal fails.
-        # TODO: If renewal fails 3 or more times we should notify an admin.
-        fail_count=0
-        service_entry.register do |status|
-          if !status[:success]
-            fail_count+=1
-            puts status[:message] + " --  Failed #{fail_count} times to connect to CgLookupService endpoint #{status[:endpoint]}."
-          else
-            fail_count=0
-            puts status[:message] + " --  Successfully renewed with CgLookupService endpoint #{status[:endpoint]}."
-          end
-          if fail_count >= 3
-            puts "TODO: An admin should be notified at this point."
-          end
-        end
-  
-        puts "|| CG #{service_name} Service is starting up..."
-  
-      end
-    end
-
     # Configure sinatra reloader for a particular environment, defaults to development.
     def configure_sinatra_reloader(enviro=:development)
       configure(enviro) do
@@ -96,6 +112,13 @@ module CgService
           puts("Install sinatra-reloader gem.")
         end
       end
+    end
+
+    # Start a thread that will register with a lookup service according
+    # to +host+, +port+, and various keys in +config+, which may be a
+    # Hash or a string filename that will be loaded using YAML.load_file
+    def start_registration_thread(host, port, config)
+      CgService.start_registration_thread(host, port, config)
     end
 
   end
