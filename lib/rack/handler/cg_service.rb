@@ -14,15 +14,16 @@ module Rack
     # completing its initialization.
     class CgService
       def self.run(app, options={})
+        reopen = lambda do |file, path|
+          if path
+            ::File.open(path, 'a') { |f| file.reopen(f) }
+            file.sync = true
+          end
+        end
+
         # Optionally redirect stdout and stderr to log files
-        options[:stdout_path].tap do |stdout_path|
-          STDOUT.reopen(stdout_path, 'a') if stdout_path
-          STDOUT.sync = true
-        end
-        options[:stderr_path].tap do |stderr_path|
-          STDERR.reopen(stderr_path, 'a') if stderr_path
-          STDERR.sync = true
-        end
+        reopen.call($stdout, options[:stdout_path])
+        reopen.call($stderr, options[:stderr_path])
 
         config = options[:service_config] || 'config/server.yml'
         ::CgService.start_registration_thread(options[:Host], options[:Port], config)
