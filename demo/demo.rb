@@ -19,7 +19,21 @@ def main
 
   puts "Finding all role types..."
   role_types = CgRoleClient::RoleType.all
+  puts role_types.size.to_s + " role types found."
+  puts "Listing role types: "
+  role_types.each do |role_type|
+    puts role_type.role_name + " on " + role_type.target_type
+  end
 
+  role_type = role_types.first
+
+  puts "\n\nFinding the activities for the " + role_type.role_name + " role type on " + role_type.target_type + "..."
+  activities = role_types.first.activities
+  puts activities.size.to_s + " activities found."
+  puts "Listing the activities:"
+  activities.each do |activity|
+    puts activity.name
+  end
 
   loop do end
 end
