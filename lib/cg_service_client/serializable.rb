@@ -2,7 +2,7 @@ require 'active_model'
 require 'active_support'
 require 'active_support/hash_with_indifferent_access'
 
-module CgRoleClient
+module CgServiceClient
   module Serializable
     extend ActiveModel::Serializers::JSON
 
