@@ -23,7 +23,7 @@ module CgServiceClient
     def find_service_endpoint
       result = CgLookupClient::Entry.lookup(@service_name, @service_version)
       if result.nil? || result[:entry].nil?
-        raise ServiceUnavailableError, "No #{name} services are available."
+        raise ServiceUnavailableError, "No #{@service_name} services are available."
       else
         eval(@endpoint_class).new(result[:entry].uri, @service_version)
       end
