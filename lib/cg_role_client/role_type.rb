@@ -77,7 +77,7 @@ module CgRoleClient
     def activities
       begin
         RoleType.ensure_endpoint
-        @endpoint.find_role_type_activities_by_role_type_id(@id)
+        RoleType.endpoint.find_role_type_activities_by_role_type_id(@id)
       rescue Exception => e
         puts e
         raise
