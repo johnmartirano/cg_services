@@ -77,7 +77,7 @@ module CgRoleClient
     end
 
     def create_role(role)
-      request_url = uri_with_version + "groups/" + role.group_id + "/roles/"
+      request_url = uri_with_version + "groups/" + role.group_id.to_s + "/roles/"
       request = Typhoeus::Request.new(request_url,
                                       :body => role.to_json,
                                       :method => :post,

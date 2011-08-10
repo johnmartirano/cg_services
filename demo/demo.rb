@@ -7,6 +7,12 @@ $: << File.expand_path(File.dirname(__FILE__) + '../../lib')
 
 require 'cg_role_client'
 
+class CgRoleClient::EntityMock
+  def id
+    5
+  end
+end
+
 # Demonstrates how to use the role service client with a single endpoint.
 # For this demo to work, you must first start up an instance of the lookup
 # service on port 5000 as well as an instance of the role service
@@ -39,9 +45,15 @@ def main
   actor = CgRoleClient::Actor.create({:actor_type => "CgUser::User", :actor_id => Time.now.to_i})
   puts "Actor " + actor.actor_type + " " + actor.actor_id.to_s + " created."
 
+  puts "\nGranting a role to the actor..."
+  role_type = CgRoleClient::RoleType.find_by_role_name_and_target_type("Reviewer","CgDocument::Work")
+  role = CgRoleClient::Role.grant(role_type,actor,CgRoleClient::EntityMock.new)
+
+
   loop do end
 end
 
 if __FILE__ == $0
   main
 end
+

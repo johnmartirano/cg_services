@@ -26,8 +26,7 @@ module CgRoleClient
     class << self
       include Aspect4r
 
-      around :all, :find, :method_name_arg => true do |method, *input,
-        &block |
+      around :all, :find, :method_name_arg => true do |method, *input, &block |
         begin
           ensure_endpoint
             # include here methods that take no arguments
@@ -50,6 +49,13 @@ module CgRoleClient
         @endpoint.find_role_type_by_id(id)
       end
 
+      def find_by_role_name_and_target_type(role_name, target_type)
+        all.each do |role_type|
+          if role_type.role_name == role_name && role_type.target_type == target_type
+            return role_type
+          end
+        end
+      end
     end
 
     def initialize(attributes = {})

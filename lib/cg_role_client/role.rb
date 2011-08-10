@@ -25,33 +25,40 @@ module CgRoleClient
     class << self
       include Aspect4r
 
-      around :grant, :find_by_user_id do |input, &block |
+      around :grant, :find do |*input, &block |
         begin
           ensure_endpoint
-          block.call(input)
+          block.call(*input)
         rescue Exception => e
           puts e
           raise
         end
       end
 
+      # Grant a new role for an actor or group on a target. Target
+      # must be an entity with an ID.
       def grant(role_type, actor_or_group, target)
+        group = group(actor_or_group)
+        role = Role.new({:role_type_id => role_type.id,
+                         :group_id => group.id,
+                         :target_id => target.id })
+        @endpoint.create_role(role)
+      end
+=begin
+      def find(actor_or_group, target)
+        group = group(actor_or_group)
+        role = Role.new({:group_id => group.id,
+                         :target_id => target.id})
+        @endpoint.find_role(role)
+      end
+=end
+      def group(actor_or_group)
         group = nil
         if actor_or_group.kind_of? CgRoleClient::Actor
-            group = @endpoint.find_singleton_group_by_role_id(actor_or_group.id)
+            group = @endpoint.find_singleton_group_by_actor_id(actor_or_group.id)
         elsif actor_or_group.kind_of? CgRoleClient::Group
             group = actor_or_group
         end
-        role = Role.new
-        role.role_type_id = role_type.id
-        role.group_id = group.id
-        role.target_id = target.id
-
-
-      end
-
-      def find(actor_or_group, target)
-        @endpoint.find_notifications_by_user_id(user_id)
       end
 
     end
