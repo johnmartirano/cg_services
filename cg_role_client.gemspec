@@ -18,7 +18,7 @@ Gem::Specification.new do |s|
   s.add_dependency "rspec", ">= 2.5.0"
   s.add_dependency "aspect4r", ">= 0.9.1"
   s.add_dependency "typhoeus", ">= 0.2.4"
-  s.add_dependency "cg_service_client", ">= 0.5.17"
+  s.add_dependency "cg_service_client", ">= 0.5.29"
   s.add_dependency "cg_lookup_client", ">= 0.5.0"
 
   s.files        = Dir.glob("{lib,spec}/**/*")

@@ -124,5 +124,28 @@ module CgRoleClient
       result_actor
     end
 
+    def find_role_type_by_role_name_and_target_type(role_name, target_type)
+      request_url = uri_with_version + "roles/types/" + role_name.capitalize,
+      request = Typhoeus::Request.new(request_url,
+                                      :method => :get,
+                                      :headers => {"Accept" => "application/json"},
+                                      :params  => {:target_type => target_type},
+                                      :timeout => RestEndpoint::REQEUST_TIMEOUT)
+      run_typhoeus_request(request) do |response|
+        CgRoleClient::RoleType.new.from_json(response.body)
+      end
+    end
+
+    def find_activity_by_code(code)
+      request_url = uri_with_version + "activities/" + code.to_s
+      request = Typhoeus::Request.new(request_url,
+                                      :method => :get,
+                                      :headers => {"Accept" => "application/json"},
+                                      :timeout => RestEndpoint::REQEUST_TIMEOUT)
+      run_typhoeus_request(request) do |response|
+        CgRoleClient::Activity.new.from_json(response.body)
+      end
+    end
+
   end
 end
