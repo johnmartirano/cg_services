@@ -6,7 +6,7 @@ require 'cg_service_client'
 
 module CgRoleClient
 
-  class RoleType
+  class Actor
     include ActiveModel::Serializers::JSON
     include ActiveModel::Validations
     include Aspect4r # this has to be here for the class level "around" to work
@@ -14,40 +14,33 @@ module CgRoleClient
 
     self.include_root_in_json = false
 
-    uses_service("Role", "1", "CgRoleClient::RestEndpoint")
+    uses_service("Role","1","CgRoleClient::RestEndpoint")
 
-    ATTRIBUTES = [:id, :role_name, :target_type, :created_at, :updated_at]
+    ATTRIBUTES = [:id, :actor_id, :actor_type, :singleton_group_id, :created_at, :updated_at]
 
     attr_accessor *ATTRIBUTES
 
-    validates_presence_of :role_name, :target_type
-    validates_length_of :role_name, :target_type, :maximum=>255
+    validates_presence_of :actor_id, :actor_type
 
     class << self
       include Aspect4r
 
-      around :all, :find, :method_name_arg => true do |method, *input,
-        &block |
+      around :create do |input, &block |
         begin
           ensure_endpoint
-            # include here methods that take no arguments
-          if method == 'all'
-            block.call
-          else
-            block.call(input[0])
-          end
+          block.call(input)
         rescue Exception => e
           puts e
           raise
         end
       end
 
-      def all
-        @endpoint.find_all_role_types
-      end
-
-      def find(id)
-        @endpoint.find_role_type_by_id(id)
+      def create(attributes = {})
+        actor = CgRoleClient::Actor.new(attributes)
+        if !actor.valid? || !actor.id.nil?
+          return false
+        end
+        @endpoint.create_actor(actor)
       end
 
     end
@@ -72,16 +65,6 @@ module CgRoleClient
       # Helper to get the value of a particular attribute.
     def read_attribute_for_validation(key)
       send(key)
-    end
-
-    def activities
-      begin
-        RoleType.ensure_endpoint
-        RoleType.endpoint.find_role_type_activities_by_role_type_id(@id)
-      rescue Exception => e
-        puts e
-        raise
-      end
     end
 
   end

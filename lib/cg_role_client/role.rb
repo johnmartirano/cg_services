@@ -16,18 +16,16 @@ module CgRoleClient
 
     uses_service("Role","1","CgRoleClient::RestEndpoint")
 
-    ATTRIBUTES = [:id, :user_id, :type_id, :heading, :body,
-                  :read, :cg_object_id, :cg_object_type, :created_at, :updated_at]
+    ATTRIBUTES = [:id, :group_id, :target_id, :role_type_id, :created_at, :updated_at]
 
     attr_accessor *ATTRIBUTES
 
-    validates_presence_of :user_id, :type_id, :heading, :body, :read
-    validates_length_of :heading, :maximum=>255
+    validates_presence_of :group_id, :target_id, :role_type_id
 
     class << self
       include Aspect4r
 
-      around :create, :find_by_user_id, :unread_count do |input, &block |
+      around :grant, :find_by_user_id do |input, &block |
         begin
           ensure_endpoint
           block.call(input)
@@ -37,17 +35,23 @@ module CgRoleClient
         end
       end
 
-      def create(attributes = {})
-        notification = CgNotificationClient::Notification.new(attributes)
-        @endpoint.create_notification(notification)
+      def grant(role_type, actor_or_group, target)
+        group = nil
+        if actor_or_group.kind_of? CgRoleClient::Actor
+            group = @endpoint.find_singleton_group_by_role_id(actor_or_group.id)
+        elsif actor_or_group.kind_of? CgRoleClient::Group
+            group = actor_or_group
+        end
+        role = Role.new
+        role.role_type_id = role_type.id
+        role.group_id = group.id
+        role.target_id = target.id
+
+
       end
 
-      def find_by_user_id(user_id)
+      def find(actor_or_group, target)
         @endpoint.find_notifications_by_user_id(user_id)
-      end
-
-      def unread_count(user_id)
-        @endpoint.unread_notifications_count(user_id)
       end
 
     end
@@ -74,37 +78,6 @@ module CgRoleClient
       send(key)
     end
 
-      # Save a true read status. Attempting to save a read status of false will result in an
-      # IllegalStateError. All previous notifications with a false read status will also be set to true.
-      # Other attribute changes will be ignored.
-    def save
-      begin
-        Notification.ensure_endpoint
-        if !valid?
-          return false;
-        end
-        if id.nil?
-          return Notification.endpoint.create_notification(self)
-        end
-
-        if read
-          Notification.endpoint.mark_notification_as_read(self)
-        else
-          raise IllegalStateError, "Cannot set read status to false."
-        end
-      rescue Exception => e
-        puts e
-        raise
-      end
-      true
-    end
-
-    def notification_type
-      NotificationType.find(@type_id)
-    end
-  end
-
-  class IllegalStateError < StandardError;
   end
 
 end

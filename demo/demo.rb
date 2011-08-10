@@ -14,10 +14,10 @@ require 'cg_role_client'
 def main
 
   # Ordinarily this would be done in application initializer code.
-  puts "Configuring the lookup client...\n\n"
+  puts "Configuring the lookup client..."
   CgLookupClient::Entry.configure_endpoint
 
-  puts "Finding all role types..."
+  puts "\nFinding all role types..."
   role_types = CgRoleClient::RoleType.all
   puts role_types.size.to_s + " role types found."
   puts "Listing role types: "
@@ -27,13 +27,17 @@ def main
 
   role_type = role_types.first
 
-  puts "\n\nFinding the activities for the " + role_type.role_name + " role type on " + role_type.target_type + "..."
+  puts "\nFinding the activities for the " + role_type.role_name + " role type on " + role_type.target_type + "..."
   activities = role_types.first.activities
   puts activities.size.to_s + " activities found."
   puts "Listing the activities:"
   activities.each do |activity|
     puts activity.name
   end
+
+  puts "\nCreating an actor..."
+  actor = CgRoleClient::Actor.create({:actor_type => "CgUser::User", :actor_id => Time.now.to_i})
+  puts "Actor " + actor.actor_type + " " + actor.actor_id.to_s + " created."
 
   loop do end
 end
