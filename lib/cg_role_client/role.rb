@@ -1,24 +1,18 @@
 require 'active_model'
-require 'active_support'
-require 'active_support/hash_with_indifferent_access'
 require 'aspect4r'
 require 'cg_service_client'
 
 module CgRoleClient
 
   class Role
-    include ActiveModel::Serializers::JSON
     include ActiveModel::Validations
     include Aspect4r # this has to be here for the class level "around" to work
+    include CgServiceClient::Serializable
     extend CgServiceClient::Serviceable
-
-    self.include_root_in_json = false
 
     uses_service("Role","1","CgRoleClient::RestEndpoint")
 
-    ATTRIBUTES = [:id, :group_id, :target_id, :role_type_id, :created_at, :updated_at]
-
-    attr_accessor *ATTRIBUTES
+    serializable_attr_accessor :id, :group_id, :target_id, :role_type_id, :created_at, :updated_at
 
     validates_presence_of :group_id, :target_id, :role_type_id
 
@@ -44,14 +38,13 @@ module CgRoleClient
                          :target_id => target.id })
         @endpoint.create_role(role)
       end
-=begin
+
       def find(actor_or_group, target)
         group = group(actor_or_group)
-        role = Role.new({:group_id => group.id,
-                         :target_id => target.id})
-        @endpoint.find_role(role)
+        roles = @endpoint.find_roles(group.id, target.class, target.id)
+        CgRoleClient::AggregateRole.new(roles)
       end
-=end
+
       def group(actor_or_group)
         group = nil
         if actor_or_group.kind_of? CgRoleClient::Actor
@@ -65,24 +58,6 @@ module CgRoleClient
 
     def initialize(attributes = {})
       self.attributes = attributes
-    end
-
-    def attributes
-      ATTRIBUTES.inject(
-          ActiveSupport::HashWithIndifferentAccess.new) do |result, key|
-        attribute_value = read_attribute_for_validation(key)
-        result[key] = attribute_value unless attribute_value == nil
-        result
-      end
-    end
-
-    def attributes=(attrs)
-      attrs.each_pair { |k, v| send("#{k}=", v) }
-    end
-
-      # Helper to get the value of a particular attribute.
-    def read_attribute_for_validation(key)
-      send(key)
     end
 
   end

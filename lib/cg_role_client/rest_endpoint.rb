@@ -16,7 +16,7 @@ module CgRoleClient
       request_url = uri_with_version + "roles/types/"
       request = Typhoeus::Request.new(request_url,
                                       :method => :get,
-                                      :headers => {:Accept => "application/json"},
+                                      :headers => {"Accept" => "application/json"},
                                       :timeout => RestEndpoint::REQEUST_TIMEOUT,
                                       :cache_timeout => SECONDS_IN_A_DAY)
 
@@ -34,7 +34,7 @@ module CgRoleClient
       request_url = uri_with_version + "roles/types/" + id.to_s
       request = Typhoeus::Request.new(request_url,
                                       :method => :get,
-                                      :headers => {:Accept => "application/json"},
+                                      :headers => {"Accept" => "application/json"},
                                       :timeout => RestEndpoint::REQEUST_TIMEOUT,
                                       :cache_timeout => SECONDS_IN_A_DAY)
       role_type = nil
@@ -49,7 +49,7 @@ module CgRoleClient
       request_url = uri_with_version + "roles/types/" + id.to_s + "/activities/"
       request = Typhoeus::Request.new(request_url,
                                       :method => :get,
-                                      :headers => {:Accept => "application/json"},
+                                      :headers => {"Accept" => "application/json"},
                                       :timeout => RestEndpoint::REQEUST_TIMEOUT,
                                       :cache_timeout => SECONDS_IN_A_DAY)
       activities = []
@@ -66,7 +66,7 @@ module CgRoleClient
       request_url = uri_with_version + "actors/" + id.to_s + "/groups/singleton/"
       request = Typhoeus::Request.new(request_url,
                                       :method => :get,
-                                      :headers => {:Accept => "application/json"},
+                                      :headers => {"Accept" => "application/json"},
                                       :timeout => RestEndpoint::REQEUST_TIMEOUT,
                                       :cache_timeout => SECONDS_IN_A_YEAR)
       group = nil
@@ -89,6 +89,24 @@ module CgRoleClient
         result_role = CgRoleClient::Role.new.from_json(response.body)
       end
       result_role
+    end
+
+    def find_roles(group_id, target_type, target_id)
+      request_url = uri_with_version + "groups/" + group_id.to_s + "/roles/"
+      request = Typhoeus::Request.new(request_url,
+                                      :method => :get,
+                                      :headers => {"Accept" => "application/json"},
+                                      :params  => {:target_type => target_type, :target_id => target_id},
+                                      :timeout => RestEndpoint::REQEUST_TIMEOUT)
+
+      roles = []
+      run_typhoeus_request(request) do |response|
+        roles_json = ActiveSupport::JSON.decode(response.body)
+        roles_json.each do |role_attributes|
+          roles << CgRoleClient::Role.new(role_attributes)
+        end
+      end
+      roles
     end
 
     def create_actor(actor)
