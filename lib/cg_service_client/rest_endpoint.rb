@@ -35,10 +35,13 @@ module CgServiceClient
 
     protected
 
+    # Returns the result of the block on success.
     def run_typhoeus_request(request)
+      ret = nil
+
       request.on_complete do |response|
         if response.success?
-          yield response
+          ret = yield response
         elsif response.code >= 400 && response.code < 500
           raise CgServiceClient::Exceptions::ClientError.new(response.code, response.status_message), "Client error #{response.code}: #{response.body}."
         elsif response.code >= 500
@@ -57,6 +60,8 @@ module CgServiceClient
       hydra = Typhoeus::Hydra.new
       hydra.queue(request)
       hydra.run
+
+      ret
     end
   end
 
