@@ -7,9 +7,11 @@ $: << File.expand_path(File.dirname(__FILE__) + '../../lib')
 
 require 'cg_role_client'
 
-class CgRoleClient::EntityMock
-  def id
-    5
+module CgDocument
+  class Work
+    def id
+      5
+    end
   end
 end
 
@@ -45,10 +47,18 @@ def main
   actor = CgRoleClient::Actor.create({:actor_type => "CgUser::User", :actor_id => Time.now.to_i})
   puts "Actor " + actor.actor_type + " " + actor.actor_id.to_s + " created."
 
-  puts "\nGranting a role to the actor..."
-  role_type = CgRoleClient::RoleType.find_by_role_name_and_target_type("Reviewer","CgDocument::Work")
-  role = CgRoleClient::Role.grant(role_type,actor,CgRoleClient::EntityMock.new)
+  puts "\nCreating a target..."
+  target = CgDocument::Work.new
+  puts "Target " + target.class.to_s + " " + target.id.to_s + " created."
 
+  puts "\nGranting a Reviewer role to the actor for target " + target.class.to_s + " " + target.id.to_s + "..."
+  role_type = CgRoleClient::RoleType.find_by_role_name_and_target_type("Reviewer","CgDocument::Work")
+  role = CgRoleClient::Role.grant(role_type,actor,target)
+  puts "Granted role ID is " + role.id.to_s
+
+  puts "\nFinding roles for the actor for CgDocument::Work targets..."
+  role = CgRoleClient::Role.find(actor,target)
+  #puts "Found role ID is " + role.id.to_s
 
   loop do end
 end
