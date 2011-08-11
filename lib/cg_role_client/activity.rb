@@ -1,7 +1,5 @@
 require 'active_model'
 require 'cg_service_client'
-require 'cg_service_client/rest_endpoint'
-require 'cg_role_client/rest_endpoint'
 
 module CgRoleClient
 

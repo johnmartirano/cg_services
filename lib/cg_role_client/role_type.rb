@@ -1,15 +1,14 @@
 require 'active_model'
 require 'aspect4r'
 require 'cg_service_client'
-require 'cg_role_client/rest_endpoint'
 
 module CgRoleClient
 
   class RoleType
-    include CgServiceClient::Serializable
-    include ActiveModel::Validations
-    extend CgServiceClient::Serviceable
     include Aspect4r
+    include ActiveModel::Validations
+    include CgServiceClient::Serializable
+    extend CgServiceClient::Serviceable
 
     uses_service("Role", "1", "CgRoleClient::RestEndpoint")
 
