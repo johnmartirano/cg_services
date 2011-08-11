@@ -7,6 +7,7 @@ $: << File.expand_path(File.dirname(__FILE__) + '../../lib')
 
 require 'cg_role_client'
 
+# A mock work
 module CgDocument
   class Work
     def id
@@ -18,7 +19,7 @@ end
 # Demonstrates how to use the role service client with a single endpoint.
 # For this demo to work, you must first start up an instance of the lookup
 # service on port 5000 as well as an instance of the role service
-# on port 5200.
+# on port 5200. Also, make sure rake db:seed has been run on the role service.
 def main
 
   # Ordinarily this would be done in application initializer code.
@@ -51,14 +52,16 @@ def main
   target = CgDocument::Work.new
   puts "Target " + target.class.to_s + " " + target.id.to_s + " created."
 
-  puts "\nGranting a Reviewer role to the actor for target " + target.class.to_s + " " + target.id.to_s + "..."
-  role_type = CgRoleClient::RoleType.find_by_role_name_and_target_type("Reviewer","CgDocument::Work")
+  puts "\nGranting a reviewer role to the actor for target " + target.class.to_s + " " + target.id.to_s + "..."
+  role_type = CgRoleClient::RoleType.reviewer("CgDocument::Work")
   role = CgRoleClient::Role.grant(role_type,actor,target)
   puts "Granted role ID is " + role.id.to_s
 
-  puts "\nFinding roles for the actor for CgDocument::Work targets..."
-  role = CgRoleClient::Role.find(actor,target)
-  #puts "Found role ID is " + role.id.to_s
+  puts "\nFinding role for the actor on the previous target..."
+  role = CgRoleClient::Role.aggregate_role(actor,target)
+  puts "Aggregate role contains " + role.roles.size.to_s + " roles"
+  puts "Testing if the role allows for read activity..."
+  puts role.allows?(CgRoleClient::Activity.read)
 
   loop do end
 end
