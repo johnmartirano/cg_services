@@ -22,8 +22,8 @@ module CgRoleClient
 
       role_types = []
       run_typhoeus_request(request) do |response|
-        role_types_json = ActiveSupport::JSON.decode(response.body)
-        role_types_json.each do |role_type_attributes|
+        decoded_role_types = ActiveSupport::JSON.decode(response.body)
+        decoded_role_types.each do |role_type_attributes|
           role_types << CgRoleClient::RoleType.new(role_type_attributes)
         end
       end
@@ -37,12 +37,9 @@ module CgRoleClient
                                       :headers => {"Accept" => "application/json"},
                                       :timeout => RestEndpoint::REQEUST_TIMEOUT,
                                       :cache_timeout => SECONDS_IN_A_DAY)
-      role_type = nil
       run_typhoeus_request(request) do |response|
-        attributes = ActiveSupport::JSON.decode(response.body)
-        role_type = CgRoleClient::RoleType.new(attributes)
+        CgRoleClient::RoleType.new.from_json(response.body)
       end
-      role_type
     end
 
     def find_role_type_activities_by_role_type_id(id)
@@ -54,8 +51,8 @@ module CgRoleClient
                                       :cache_timeout => SECONDS_IN_A_DAY)
       activities = []
       run_typhoeus_request(request) do |response|
-        activities_json = ActiveSupport::JSON.decode(response.body)
-        activities_json.each do |activity_attributes|
+        decoded_activities = ActiveSupport::JSON.decode(response.body)
+        decoded_activities.each do |activity_attributes|
           activities << CgRoleClient::Activity.new(activity_attributes)
         end
       end
@@ -69,11 +66,9 @@ module CgRoleClient
                                       :headers => {"Accept" => "application/json"},
                                       :timeout => RestEndpoint::REQEUST_TIMEOUT,
                                       :cache_timeout => SECONDS_IN_A_YEAR)
-      group = nil
       run_typhoeus_request(request) do |response|
-        group = CgRoleClient::Group.new.from_json(response.body)
+        CgRoleClient::Group.new.from_json(response.body)
       end
-      group
     end
 
     def create_role(role)
@@ -83,12 +78,9 @@ module CgRoleClient
                                       :method => :post,
                                       :headers => {"Accept" => "application/json", "Content-Type" => "application/json; charset=utf-8"},
                                       :timeout => RestEndpoint::REQEUST_TIMEOUT)
-
-      result_role = nil
       run_typhoeus_request(request) do |response|
-        result_role = CgRoleClient::Role.new.from_json(response.body)
+        CgRoleClient::Role.new.from_json(response.body)
       end
-      result_role
     end
 
     def find_roles(group_id, target_type, target_id)
@@ -101,8 +93,8 @@ module CgRoleClient
 
       roles = []
       run_typhoeus_request(request) do |response|
-        roles_json = ActiveSupport::JSON.decode(response.body)
-        roles_json.each do |role_attributes|
+        decoded_roles = ActiveSupport::JSON.decode(response.body)
+        decoded_roles.each do |role_attributes|
           roles << CgRoleClient::Role.new(role_attributes)
         end
       end
@@ -116,12 +108,9 @@ module CgRoleClient
                                       :method => :post,
                                       :headers => {"Accept" => "application/json", "Content-Type" => "application/json; charset=utf-8"},
                                       :timeout => RestEndpoint::REQEUST_TIMEOUT)
-
-      result_actor = nil
       run_typhoeus_request(request) do |response|
-        result_actor = CgRoleClient::Actor.new.from_json(response.body)
+        CgRoleClient::Actor.new.from_json(response.body)
       end
-      result_actor
     end
 
     def find_role_type_by_role_name_and_target_type(role_name, target_type)
