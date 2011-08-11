@@ -19,10 +19,14 @@ module CgRoleClient
     class << self
       include Aspect4r
 
-      around :create do |input, &block |
+      around :create, :find_by_actor_type_and_actor_id, :method_name_arg => true do |method, *args, &block |
         begin
           ensure_endpoint
-          block.call(input)
+          if method == 'find_by_actor_type_and_actor_id'
+            block.call(args[0],args[1])
+          else
+            block.call(args[0])
+          end
         rescue Exception => e
           puts e
           raise
@@ -37,6 +41,9 @@ module CgRoleClient
         @endpoint.create_actor(actor)
       end
 
+      def find_by_actor_type_and_actor_id(actor_type, actor_id)
+        @endpoint.find_actor_by_actor_type_and_actor_id(actor_type,actor_id)
+      end
     end
 
     def initialize(attributes = {})
