@@ -41,7 +41,7 @@ module CgRoleClient
 
       def aggregate_role(actor_or_group, target)
         group = group_for(actor_or_group)
-        roles = @endpoint.find_roles(group.id, target.class, target.id)
+        roles = @endpoint.find_group_roles_on_target(group.id, target.class, target.id)
         CgRoleClient::AggregateRole.new(roles)
       end
 
