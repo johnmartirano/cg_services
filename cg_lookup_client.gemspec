@@ -16,6 +16,7 @@ Gem::Specification.new do |s|
   s.add_dependency "rest-client", ">= 1.6.3"
   s.add_dependency "activemodel", ">= 3.0.0"
   s.add_dependency "activerecord", ">= 3.0.0"
+  s.add_dependency "cg_service_client", ">= 0.5.29"
   s.add_dependency "rspec", "~> 2.5.0"
 
   s.files        = Dir.glob("{lib,spec}/**/*")
