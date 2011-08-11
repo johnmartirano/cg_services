@@ -48,6 +48,10 @@ def main
   actor = CgRoleClient::Actor.create({:actor_type => "CgUser::User", :actor_id => Time.now.to_i})
   puts "Actor " + actor.actor_type + " " + actor.actor_id.to_s + " created."
 
+  puts "\nFinding an actor..."
+  actor = CgRoleClient::Actor.find_by_actor_type_and_actor_id(actor.actor_type, actor.actor_id)
+  puts "Actor " + actor.actor_type + " " + actor.actor_id.to_s + " found."
+
   puts "\nCreating a target..."
   target = CgDocument::Work.new
   puts "Target " + target.class.to_s + " " + target.id.to_s + " created."
