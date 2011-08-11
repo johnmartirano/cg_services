@@ -83,7 +83,7 @@ module CgRoleClient
       end
     end
 
-    def find_roles(group_id, target_type, target_id)
+    def find_group_roles_on_target(group_id, target_type, target_id)
       request_url = uri_with_version + "groups/" + group_id.to_s + "/roles/"
       request = Typhoeus::Request.new(request_url,
                                       :method => :get,
@@ -113,6 +113,19 @@ module CgRoleClient
       end
     end
 
+    def find_actor_by_actor_type_and_actor_id(actor_type, actor_id)
+      request_url = uri_with_version + "actors/"
+      request = Typhoeus::Request.new(request_url,
+                                      :method => :get,
+                                      :headers => {"Accept" => "application/json"},
+                                      :params  => {:actor_type => actor_type, :actor_id => actor_id},
+                                      :timeout => RestEndpoint::REQEUST_TIMEOUT,
+                                      :cache_timeout => SECONDS_IN_A_DAY)
+      run_typhoeus_request(request) do |response|
+        CgRoleClient::Actor.new.from_json(response.body)
+      end
+    end
+
     def find_role_type_by_role_name_and_target_type(role_name, target_type)
       request_url = uri_with_version + "roles/types/" + role_name.to_s.capitalize
       request = Typhoeus::Request.new(request_url,
@@ -126,6 +139,28 @@ module CgRoleClient
     end
 
     def find_activity_by_code(code)
+      request_url = uri_with_version + "activities/" + code.to_s
+      request = Typhoeus::Request.new(request_url,
+                                      :method => :get,
+                                      :headers => {"Accept" => "application/json"},
+                                      :timeout => RestEndpoint::REQEUST_TIMEOUT)
+      run_typhoeus_request(request) do |response|
+        CgRoleClient::Activity.new.from_json(response.body)
+      end
+    end
+
+    def find_group_by_code(code)
+      request_url = uri_with_version + "activities/" + code.to_s
+      request = Typhoeus::Request.new(request_url,
+                                      :method => :get,
+                                      :headers => {"Accept" => "application/json"},
+                                      :timeout => RestEndpoint::REQEUST_TIMEOUT)
+      run_typhoeus_request(request) do |response|
+        CgRoleClient::Activity.new.from_json(response.body)
+      end
+    end
+
+    def find_group_actors_by_group_id(code)
       request_url = uri_with_version + "activities/" + code.to_s
       request = Typhoeus::Request.new(request_url,
                                       :method => :get,
