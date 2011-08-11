@@ -32,34 +32,36 @@ module CgRoleClient
       # Grant a new role for an actor or group on a target. Target
       # must be an entity with an ID.
       def grant(role_type, actor_or_group, target)
-        group = group(actor_or_group)
+        group = group_for(actor_or_group)
         role = Role.new({:role_type_id => role_type.id,
                          :group_id => group.id,
                          :target_id => target.id })
         @endpoint.create_role(role)
       end
 
-      def find(actor_or_group, target)
-        group = group(actor_or_group)
+      def aggregate_role(actor_or_group, target)
+        group = group_for(actor_or_group)
         roles = @endpoint.find_roles(group.id, target.class, target.id)
         CgRoleClient::AggregateRole.new(roles)
       end
 
-      def group(actor_or_group)
-        group = nil
+      def group_for(actor_or_group)
+        group = actor_or_group
         if actor_or_group.kind_of? CgRoleClient::Actor
-            group = @endpoint.find_singleton_group_by_actor_id(actor_or_group.id)
-        elsif actor_or_group.kind_of? CgRoleClient::Group
-            group = actor_or_group
+          group = @endpoint.find_singleton_group_by_actor_id(actor_or_group.id)
         end
       end
 
+      private :group_for
     end
 
     def initialize(attributes = {})
       self.attributes = attributes
     end
 
+    def role_type
+      RoleType.find(@role_type_id)
+    end
   end
 
 end
