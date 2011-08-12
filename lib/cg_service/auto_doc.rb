@@ -1,4 +1,5 @@
 require 'yard'  # must come before activesupport is loaded to avoid 'require' override oddness
+require 'tmpdir'
 
 module CgService
   # Include this module and set class attribute 'auto_doc_file'.
@@ -57,13 +58,18 @@ module CgService
 
     # Render the YARD documentation for the current class, using the cg_service templates
     def generate_documentation_html
-      YARD::Tags::Library.define_tag('', :request_param, :with_types_and_name)
-      YARD::Tags::Library.define_tag('', :request_body, :with_types_and_name)
-      YARD::Registry.load([self.class.auto_doc_file], true)
-      template_path = File.join(File.dirname(__FILE__), '../../templates_custom')
-      YARD::Templates::Engine.register_template_path(template_path)
-      YARD::Templates::Engine.render(:object => YARD::Registry.resolve(nil, self.class.to_s),
-                                     :format => :html)
+      YARD::Registry.yardoc_file = Dir.mktmpdir('auto_yardoc')
+      begin
+        YARD::Tags::Library.define_tag('', :request_param, :with_types_and_name)
+        YARD::Tags::Library.define_tag('', :request_body, :with_types_and_name)
+        YARD::Registry.load([self.class.auto_doc_file], true)
+        template_path = File.join(File.dirname(__FILE__), '../../templates_custom')
+        YARD::Templates::Engine.register_template_path(template_path)
+        YARD::Templates::Engine.render(:object => YARD::Registry.resolve(nil, self.class.to_s),
+                                       :format => :html)
+      ensure
+        YARD::Registry.delete_from_disk
+      end
     end
   end
 end
