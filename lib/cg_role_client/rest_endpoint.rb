@@ -160,15 +160,32 @@ module CgRoleClient
       end
     end
 
-    def find_group_actors_by_group_id(code)
-      request_url = uri_with_version + "activities/" + code.to_s
+    def create_group(group)
+      request_url = uri_with_version + "groups/"
+      request = Typhoeus::Request.new(request_url,
+                                      :body => group.to_json,
+                                      :method => :post,
+                                      :headers => {"Accept" => "application/json", "Content-Type" => "application/json; charset=utf-8"},
+                                      :timeout => RestEndpoint::REQEUST_TIMEOUT)
+      run_typhoeus_request(request) do |response|
+        CgRoleClient::Group.new.from_json(response.body)
+      end
+    end
+
+    def find_group_actors_by_group_id(id)
+      request_url = uri_with_version + "groups/" + id.to_s + "/actors"
       request = Typhoeus::Request.new(request_url,
                                       :method => :get,
                                       :headers => {"Accept" => "application/json"},
                                       :timeout => RestEndpoint::REQEUST_TIMEOUT)
+      actors = []
       run_typhoeus_request(request) do |response|
-        CgRoleClient::Activity.new.from_json(response.body)
+        decoded_actors = ActiveSupport::JSON.decode(response.body)
+        decoded_actors.each do |actor_attributes|
+          actors << CgRoleClient::Actor.new(actor_attributes)
+        end
       end
+      actors
     end
 
   end
