@@ -50,6 +50,15 @@ module CgRoleClient
       self.attributes = attributes
     end
 
+    def singleton_group
+      begin
+        ensure_endpoint
+        @endpoint.find_singleton_group_by_actor_id(@actor_id)
+      rescue Exception => e
+        puts e
+        raise
+      end
+    end
   end
 
 end
