@@ -19,7 +19,12 @@ module CgRoleClient
       end
 
       def method_missing(sym, *args, &block)
-        endpoint.find_activity_by_code(sym.to_s)
+        begin
+          endpoint.find_activity_by_code(sym.to_s)
+        rescue Exception => e
+          puts e
+          raise
+        end
       end
     end
 
