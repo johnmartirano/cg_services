@@ -1,3 +1,4 @@
+require 'cg_service/auto_doc'
 require 'active_record'
 require 'sinatra/base'
 require 'yaml'

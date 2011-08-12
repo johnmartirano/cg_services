@@ -18,8 +18,9 @@ Gem::Specification.new do |s|
   s.add_dependency 'thin', '~>1.2.8'
   s.add_dependency 'json', '>=1.4.6'
   s.add_dependency 'cg_lookup_client'
+  s.add_dependency 'yard', '~> 0.7.2'
 
-  s.files        = Dir.glob("{lib,spec}/**/*")
+  s.files        = Dir.glob("{lib,spec,templates_custom}/**/*")
 
   s.require_paths = ['lib']
 end
