@@ -150,13 +150,13 @@ module CgRoleClient
     end
 
     def find_group_by_code(code)
-      request_url = uri_with_version + "activities/" + code.to_s
+      request_url = uri_with_version + "groups/" + code.to_s
       request = Typhoeus::Request.new(request_url,
                                       :method => :get,
                                       :headers => {"Accept" => "application/json"},
                                       :timeout => RestEndpoint::REQEUST_TIMEOUT)
       run_typhoeus_request(request) do |response|
-        CgRoleClient::Activity.new.from_json(response.body)
+        CgRoleClient::Group.new.from_json(response.body)
       end
     end
 
