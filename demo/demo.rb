@@ -52,6 +52,18 @@ def main
   actor = CgRoleClient::Actor.find_by_actor_type_and_actor_id(actor.actor_type, actor.actor_id)
   puts "Actor " + actor.actor_type + " " + actor.actor_id.to_s + " found."
 
+  puts "\nCreating another actor..."
+  actor2 = CgRoleClient::Actor.create({:actor_type => "CgUser::User", :actor_id => Time.now.to_i+1})
+  puts "Actor " + actor2.actor_type + " " + actor2.actor_id.to_s + " created."
+
+  puts "\nCreating a group..."
+  group = CgRoleClient::Group.create({:code => "test_group" + Time.now.to_i.to_s, :name => "Test group"})
+  puts "Group " + group.code + " " + group.id.to_s + " created."
+=begin
+  puts "\nAdding actors to the group..."
+  group = CgRoleClient::Group.create({:code => "test_group" + Time.now.to_i.to_s, :name => "Test group"})
+  puts "Group " + group.code + " " + group.id.to_s + " created."
+=end
   puts "\nCreating a target..."
   target = CgDocument::Work.new
   puts "Target " + target.class.to_s + " " + target.id.to_s + " created."
@@ -67,7 +79,6 @@ def main
   puts "Testing if the role allows for read activity..."
   puts role.allows?(CgRoleClient::Activity.read)
 
-  loop do end
 end
 
 if __FILE__ == $0
