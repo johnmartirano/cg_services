@@ -58,7 +58,7 @@ def main
 
   puts "\nCreating a group..."
   group = CgRoleClient::Group.create({:code => "test_group" + Time.now.to_i.to_s, :name => "Test group"})
-  puts "Group " + group.code + " " + group.id.to_s + " created."
+  puts "Group " + group.id.to_s + " created."
 
   puts "\nAdding actors to group " + group.code + "..."
   result = group.add(actor)
@@ -68,7 +68,7 @@ def main
 
   puts "\nFinding the actors in group " + group.code + "..."
   actors = group.actors
-  puts actors.size.to_s + " actors in group " + group.code.to_s + ". Listing the actors:"
+  puts actors.size.to_s + " actors in group " + group.id.to_s + ". Listing the actors:"
   puts "Actor " + actors[0].actor_type + " " + actors[0].actor_id.to_s + "."
   puts "Actor " + actors[1].actor_type + " " + actors[1].actor_id.to_s + "."
 
@@ -76,23 +76,23 @@ def main
   target = CgDocument::Work.new
   puts "Target " + target.class.to_s + " " + target.id.to_s + " created."
 
-  puts "\nGranting a reviewer role to group " + group.code + " for target " + target.class.to_s + " " + target.id.to_s + "..."
+  puts "\nGranting a reviewer role to group " + group.id.to_s + " for target " + target.class.to_s + " " + target.id.to_s + "..."
   role_type = CgRoleClient::RoleType.reviewer("CgDocument::Work")
   role = CgRoleClient::Role.grant(role_type,group,target)
   puts "Granted role ID is " + role.id.to_s
 
-  puts "\nFinding role for the group on the previous target..."
+  puts "\nFinding role for group " + group.id.to_s + " on the previous target..."
   role = CgRoleClient::Role.aggregate_role(group,target)
   puts "Aggregate role contains " + role.roles.size.to_s + " roles"
   puts "Testing if the role allows for read activity..."
   puts role.allows?(CgRoleClient::Activity.read)
 
-  puts "\nGranting a reviewer role to the actor for target " + target.class.to_s + " " + target.id.to_s + "..."
+  puts "\nGranting a reviewer role to actor " + actor.id.to_s + " for target " + target.class.to_s + " " + target.id.to_s + "..."
   role_type = CgRoleClient::RoleType.reviewer("CgDocument::Work")
   role = CgRoleClient::Role.grant(role_type,actor,target)
   puts "Granted role ID is " + role.id.to_s
 
-  puts "\nFinding role for the actor on the previous target..."
+  puts "\nFinding role for the actor " + actor.id.to_s + " on the previous target..."
   role = CgRoleClient::Role.aggregate_role(actor,target)
   puts "Aggregate role contains " + role.roles.size.to_s + " roles"
   puts "Testing if the role allows for read activity..."
