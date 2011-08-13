@@ -59,14 +59,33 @@ def main
   puts "\nCreating a group..."
   group = CgRoleClient::Group.create({:code => "test_group" + Time.now.to_i.to_s, :name => "Test group"})
   puts "Group " + group.code + " " + group.id.to_s + " created."
-=begin
-  puts "\nAdding actors to the group..."
-  group = CgRoleClient::Group.create({:code => "test_group" + Time.now.to_i.to_s, :name => "Test group"})
-  puts "Group " + group.code + " " + group.id.to_s + " created."
-=end
+
+  puts "\nAdding actors to group " + group.code + "..."
+  result = group.add(actor)
+  puts "Actor " + actor.actor_type + " " + actor.actor_id.to_s + " added to group " + group.id.to_s + "."
+  result = group.add(actor2)
+  puts "Actor " + actor2.actor_type + " " + actor2.actor_id.to_s + " added to group " + group.id.to_s + "."
+
+  puts "\nFinding the actors in group " + group.code + "..."
+  actors = group.actors
+  puts actors.size.to_s + " actors in group " + group.code.to_s + ". Listing the actors:"
+  puts "Actor " + actors[0].actor_type + " " + actors[0].actor_id.to_s + "."
+  puts "Actor " + actors[1].actor_type + " " + actors[1].actor_id.to_s + "."
+
   puts "\nCreating a target..."
   target = CgDocument::Work.new
   puts "Target " + target.class.to_s + " " + target.id.to_s + " created."
+
+  puts "\nGranting a reviewer role to group " + group.code + " for target " + target.class.to_s + " " + target.id.to_s + "..."
+  role_type = CgRoleClient::RoleType.reviewer("CgDocument::Work")
+  role = CgRoleClient::Role.grant(role_type,group,target)
+  puts "Granted role ID is " + role.id.to_s
+
+  puts "\nFinding role for the group on the previous target..."
+  role = CgRoleClient::Role.aggregate_role(group,target)
+  puts "Aggregate role contains " + role.roles.size.to_s + " roles"
+  puts "Testing if the role allows for read activity..."
+  puts role.allows?(CgRoleClient::Activity.read)
 
   puts "\nGranting a reviewer role to the actor for target " + target.class.to_s + " " + target.id.to_s + "..."
   role_type = CgRoleClient::RoleType.reviewer("CgDocument::Work")
@@ -78,6 +97,14 @@ def main
   puts "Aggregate role contains " + role.roles.size.to_s + " roles"
   puts "Testing if the role allows for read activity..."
   puts role.allows?(CgRoleClient::Activity.read)
+
+  puts "\nRemoving the actors in group " + group.code + "..."
+  actors = group.actors
+  result = group.remove(actor)
+  puts "Actor " + actor.actor_type + " " + actor.actor_id.to_s + " removed from group " + group.id.to_s + "."
+  result = group.remove(actor2)
+  puts "Actor " + actor2.actor_type + " " + actor2.actor_id.to_s + " removed from group " + group.id.to_s + "."
+  puts "Group " + group.code + " contains " + group.actors.size.to_s + " actors."
 
 end
 

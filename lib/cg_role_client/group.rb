@@ -47,14 +47,31 @@ module CgRoleClient
       self.attributes = attributes
     end
 
-    def actors
+    around :add, :remove, :actors, :method_name_arg => true do |method, *args, &block |
       begin
-        ensure_endpoint
-        @endpoint.find_group_actors_by_group_id(@id)
+        Group.ensure_endpoint
+          # include here methods that take no arguments
+        if method == 'actors'
+          block.call
+        else
+          block.call(args[0])
+        end
       rescue Exception => e
         puts e
         raise
       end
+    end
+
+    def add(actor)
+      Group.endpoint.add_actor_to_group(@id, actor)
+    end
+
+    def remove(actor)
+      Group.endpoint.remove_actor_from_group(@id, actor)
+    end
+
+    def actors
+      Group.endpoint.find_group_actors_by_group_id(@id)
     end
 
     # Might be needed later

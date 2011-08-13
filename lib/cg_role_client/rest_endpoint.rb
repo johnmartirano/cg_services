@@ -143,7 +143,8 @@ module CgRoleClient
       request = Typhoeus::Request.new(request_url,
                                       :method => :get,
                                       :headers => {"Accept" => "application/json"},
-                                      :timeout => RestEndpoint::REQEUST_TIMEOUT)
+                                      :timeout => RestEndpoint::REQEUST_TIMEOUT,
+                                      :cache_timeout => SECONDS_IN_A_DAY)
       run_typhoeus_request(request) do |response|
         CgRoleClient::Activity.new.from_json(response.body)
       end
@@ -186,6 +187,30 @@ module CgRoleClient
         end
       end
       actors
+    end
+
+    def add_actor_to_group(group_id, actor)
+      request_url = uri_with_version + "groups/" + group_id.to_s + "/actors/"
+      request = Typhoeus::Request.new(request_url,
+                                      :body => actor.to_json,
+                                      :method => :post,
+                                      :headers => {"Accept" => "application/json", "Content-Type" => "application/json; charset=utf-8"},
+                                      :timeout => RestEndpoint::REQEUST_TIMEOUT)
+      run_typhoeus_request(request) do |response|
+        response.body
+      end
+    end
+
+    def remove_actor_from_group(group_id, actor)
+      request_url = uri_with_version + "groups/" + group_id.to_s + "/actors/"
+      request = Typhoeus::Request.new(request_url,
+                                      :body => actor.to_json,
+                                      :method => :delete,
+                                      :headers => {"Accept" => "application/json", "Content-Type" => "application/json; charset=utf-8"},
+                                      :timeout => RestEndpoint::REQEUST_TIMEOUT)
+      run_typhoeus_request(request) do |response|
+        response.body
+      end
     end
 
   end

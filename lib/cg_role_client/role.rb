@@ -19,7 +19,7 @@ module CgRoleClient
     class << self
       include Aspect4r
 
-      around :grant, :aggregate_role do |*args, &block |
+      around :grant, :aggregate_role, :method_name_arg => true do |method, *args, &block |
         begin
           ensure_endpoint
           block.call(*args)
@@ -50,6 +50,7 @@ module CgRoleClient
         if actor_or_group.kind_of? CgRoleClient::Actor
           group = @endpoint.find_singleton_group_by_actor_id(actor_or_group.id)
         end
+        group
       end
 
       private :group_for
