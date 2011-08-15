@@ -3,7 +3,7 @@ require 'aspect4r'
 require 'cg_service_client'
 
 module CgRoleClient
-
+  # A group is a container for multiple actors.
   class Group
     include ActiveModel::Validations
     include Aspect4r # this has to be here for the class level "around" to work

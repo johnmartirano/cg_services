@@ -3,7 +3,8 @@ require 'aspect4r'
 require 'cg_service_client'
 
 module CgRoleClient
-
+  # A role represents a set of permissions for an actor or group
+  # on a particular target.
   class Role
     include ActiveModel::Validations
     include Aspect4r # this has to be here for the class level "around" to work
@@ -39,6 +40,8 @@ module CgRoleClient
         @endpoint.create_role(role)
       end
 
+      # Get the aggregate role for an actor or group on a target.
+      # See CgRoleClient::AggregateRole
       def aggregate_role(actor_or_group, target)
         group = group_for(actor_or_group)
         roles = @endpoint.find_group_roles_on_target(group.id, target.class, target.id)

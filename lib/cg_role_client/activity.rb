@@ -2,7 +2,13 @@ require 'active_model'
 require 'cg_service_client'
 
 module CgRoleClient
-
+  # An activity is some action that is performable by an actor or group.
+  # Examples would include read, write, create, etc. There is not a
+  # direct link between an actor and an activity. Rather, an actor
+  # is granted a role on a particular target. Each role has an
+  # associated role type. Role types are associated with activities.
+  # So, an actor or group is granted permission to perform activities
+  # on a target by means of the role type a role is associated with.
   class Activity
     include ActiveModel::Validations
     include CgServiceClient::Serializable
@@ -18,6 +24,8 @@ module CgRoleClient
         @endpoint
       end
 
+      # Enables activities to be found using statements
+      # such as, Activity.read, Activity.write, etc.
       def method_missing(sym, *args, &block)
         begin
           endpoint.find_activity_by_code(sym.to_s)

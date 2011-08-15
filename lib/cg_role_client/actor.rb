@@ -3,7 +3,9 @@ require 'aspect4r'
 require 'cg_service_client'
 
 module CgRoleClient
-
+  # Actors are granted roles on target objects. It is a polymorphic type which
+  # will usually represent CgUser::User but we may use other types as actors
+  # in the future.
   class Actor
     include ActiveModel::Validations
     include Aspect4r # this has to be here for the class level "around" to work
@@ -50,6 +52,8 @@ module CgRoleClient
       self.attributes = attributes
     end
 
+    # Return this actor's singleton group. Each actor is associated
+    # with a group that only it is a member of.
     def singleton_group
       begin
         ensure_endpoint

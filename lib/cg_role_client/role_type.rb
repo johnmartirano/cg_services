@@ -4,6 +4,8 @@ require 'cg_service_client'
 
 module CgRoleClient
 
+  # A role type groups together a named set of activities that an actor or group
+  # may be associated with by virtue of a granted role.
   class RoleType
     include Aspect4r
     include ActiveModel::Validations
