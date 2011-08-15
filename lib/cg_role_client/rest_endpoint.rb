@@ -7,7 +7,8 @@ module CgRoleClient
 
     SECONDS_IN_A_DAY = 86400
     SECONDS_IN_A_YEAR = SECONDS_IN_A_DAY * 365
-
+    REQUEST_TIMEOUT = CgServiceClient::RestEndpoint::REQUEST_TIMEOUT
+    
     def initialize(uri, version)
       super
     end
@@ -17,7 +18,7 @@ module CgRoleClient
       request = Typhoeus::Request.new(request_url,
                                       :method => :get,
                                       :headers => {"Accept" => "application/json"},
-                                      :timeout => RestEndpoint::REQUEST_TIMEOUT,
+                                      :timeout => REQUEST_TIMEOUT,
                                       :cache_timeout => SECONDS_IN_A_DAY)
 
       role_types = []
@@ -35,7 +36,7 @@ module CgRoleClient
       request = Typhoeus::Request.new(request_url,
                                       :method => :get,
                                       :headers => {"Accept" => "application/json"},
-                                      :timeout => RestEndpoint::REQUEST_TIMEOUT,
+                                      :timeout => REQUEST_TIMEOUT,
                                       :cache_timeout => SECONDS_IN_A_DAY)
       run_typhoeus_request(request) do |response|
         CgRoleClient::RoleType.new.from_json(response.body)
@@ -47,7 +48,7 @@ module CgRoleClient
       request = Typhoeus::Request.new(request_url,
                                       :method => :get,
                                       :headers => {"Accept" => "application/json"},
-                                      :timeout => RestEndpoint::REQUEST_TIMEOUT,
+                                      :timeout => REQUEST_TIMEOUT,
                                       :cache_timeout => SECONDS_IN_A_DAY)
       activities = []
       run_typhoeus_request(request) do |response|
@@ -64,7 +65,7 @@ module CgRoleClient
       request = Typhoeus::Request.new(request_url,
                                       :method => :get,
                                       :headers => {"Accept" => "application/json"},
-                                      :timeout => RestEndpoint::REQUEST_TIMEOUT,
+                                      :timeout => REQUEST_TIMEOUT,
                                       :cache_timeout => SECONDS_IN_A_YEAR)
       run_typhoeus_request(request) do |response|
         CgRoleClient::Group.new.from_json(response.body)
@@ -77,7 +78,7 @@ module CgRoleClient
                                       :body => role.to_json,
                                       :method => :post,
                                       :headers => {"Accept" => "application/json", "Content-Type" => "application/json; charset=utf-8"},
-                                      :timeout => RestEndpoint::REQUEST_TIMEOUT)
+                                      :timeout => REQUEST_TIMEOUT)
       run_typhoeus_request(request) do |response|
         CgRoleClient::Role.new.from_json(response.body)
       end
@@ -89,7 +90,7 @@ module CgRoleClient
                                       :method => :get,
                                       :headers => {"Accept" => "application/json"},
                                       :params  => {:target_type => target_type, :target_id => target_id},
-                                      :timeout => RestEndpoint::REQUEST_TIMEOUT)
+                                      :timeout => REQUEST_TIMEOUT)
 
       roles = []
       run_typhoeus_request(request) do |response|
@@ -107,7 +108,7 @@ module CgRoleClient
                                       :body => actor.to_json,
                                       :method => :post,
                                       :headers => {"Accept" => "application/json", "Content-Type" => "application/json; charset=utf-8"},
-                                      :timeout => RestEndpoint::REQUEST_TIMEOUT)
+                                      :timeout => REQUEST_TIMEOUT)
       run_typhoeus_request(request) do |response|
         CgRoleClient::Actor.new.from_json(response.body)
       end
@@ -119,7 +120,7 @@ module CgRoleClient
                                       :method => :get,
                                       :headers => {"Accept" => "application/json"},
                                       :params  => {:actor_type => actor_type, :actor_id => actor_id},
-                                      :timeout => RestEndpoint::REQUEST_TIMEOUT,
+                                      :timeout => REQUEST_TIMEOUT,
                                       :cache_timeout => SECONDS_IN_A_DAY)
       run_typhoeus_request(request) do |response|
         CgRoleClient::Actor.new.from_json(response.body)
@@ -132,7 +133,7 @@ module CgRoleClient
                                       :method => :get,
                                       :headers => {"Accept" => "application/json"},
                                       :params  => {:target_type => target_type},
-                                      :timeout => RestEndpoint::REQUEST_TIMEOUT)
+                                      :timeout => REQUEST_TIMEOUT)
       run_typhoeus_request(request) do |response|
         CgRoleClient::RoleType.new.from_json(response.body)
       end
@@ -143,7 +144,7 @@ module CgRoleClient
       request = Typhoeus::Request.new(request_url,
                                       :method => :get,
                                       :headers => {"Accept" => "application/json"},
-                                      :timeout => RestEndpoint::REQUEST_TIMEOUT,
+                                      :timeout => REQUEST_TIMEOUT,
                                       :cache_timeout => SECONDS_IN_A_DAY)
       run_typhoeus_request(request) do |response|
         CgRoleClient::Activity.new.from_json(response.body)
@@ -155,7 +156,7 @@ module CgRoleClient
       request = Typhoeus::Request.new(request_url,
                                       :method => :get,
                                       :headers => {"Accept" => "application/json"},
-                                      :timeout => RestEndpoint::REQUEST_TIMEOUT)
+                                      :timeout => REQUEST_TIMEOUT)
       run_typhoeus_request(request) do |response|
         CgRoleClient::Group.new.from_json(response.body)
       end
@@ -167,7 +168,7 @@ module CgRoleClient
                                       :body => group.to_json,
                                       :method => :post,
                                       :headers => {"Accept" => "application/json", "Content-Type" => "application/json; charset=utf-8"},
-                                      :timeout => RestEndpoint::REQUEST_TIMEOUT)
+                                      :timeout => REQUEST_TIMEOUT)
       run_typhoeus_request(request) do |response|
         CgRoleClient::Group.new.from_json(response.body)
       end
@@ -178,7 +179,7 @@ module CgRoleClient
       request = Typhoeus::Request.new(request_url,
                                       :method => :get,
                                       :headers => {"Accept" => "application/json"},
-                                      :timeout => RestEndpoint::REQUEST_TIMEOUT)
+                                      :timeout => REQUEST_TIMEOUT)
       actors = []
       run_typhoeus_request(request) do |response|
         decoded_actors = ActiveSupport::JSON.decode(response.body)
@@ -195,7 +196,7 @@ module CgRoleClient
                                       :body => actor.to_json,
                                       :method => :post,
                                       :headers => {"Accept" => "application/json", "Content-Type" => "application/json; charset=utf-8"},
-                                      :timeout => RestEndpoint::REQUEST_TIMEOUT)
+                                      :timeout => REQUEST_TIMEOUT)
       run_typhoeus_request(request) do |response|
         response.body
       end
@@ -207,7 +208,7 @@ module CgRoleClient
                                       :body => actor.to_json,
                                       :method => :delete,
                                       :headers => {"Accept" => "application/json", "Content-Type" => "application/json; charset=utf-8"},
-                                      :timeout => RestEndpoint::REQUEST_TIMEOUT)
+                                      :timeout => REQUEST_TIMEOUT)
       run_typhoeus_request(request) do |response|
         response.body
       end

@@ -24,11 +24,7 @@ module CgRoleClient
       around :create, :find_by_actor_type_and_actor_id, :method_name_arg => true do |method, *args, &block |
         begin
           ensure_endpoint
-          if method == 'find_by_actor_type_and_actor_id'
-            block.call(args[0],args[1])
-          else
-            block.call(args[0])
-          end
+          block.call(*args)
         rescue Exception => e
           puts e
           raise

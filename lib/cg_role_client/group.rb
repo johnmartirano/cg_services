@@ -22,7 +22,7 @@ module CgRoleClient
       around :create, :find_by_code, :method_name_arg => true do |method, *args, &block |
         begin
           ensure_endpoint
-          block.call(args[0])
+          block.call(*args)
         rescue Exception => e
           puts e
           raise
@@ -50,12 +50,7 @@ module CgRoleClient
     around :add, :remove, :actors, :method_name_arg => true do |method, *args, &block |
       begin
         Group.ensure_endpoint
-          # include here methods that take no arguments
-        if method == 'actors'
-          block.call
-        else
-          block.call(args[0])
-        end
+        block.call(*args)
       rescue Exception => e
         puts e
         raise
