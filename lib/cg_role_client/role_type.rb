@@ -27,7 +27,7 @@ module CgRoleClient
           block.call(*args)
         rescue Exception => e
           puts e
-          raise e
+          raise
         end
       end
 
