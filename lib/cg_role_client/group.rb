@@ -19,7 +19,7 @@ module CgRoleClient
     class << self
       include Aspect4r
 
-      around :create, :find_by_code, :method_name_arg => true do |method, *args, &block |
+      around :create, :find_by_code do | *args, &block |
         begin
           ensure_endpoint
           block.call(*args)
@@ -47,7 +47,7 @@ module CgRoleClient
       self.attributes = attributes
     end
 
-    around :add, :remove, :actors, :method_name_arg => true do |method, *args, &block |
+    around :add, :remove, :actors do | *args, &block |
       begin
         Group.ensure_endpoint
         block.call(*args)

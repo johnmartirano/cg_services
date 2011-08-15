@@ -56,6 +56,10 @@ def main
   actor2 = CgRoleClient::Actor.create({:actor_type => "CgUser::User", :actor_id => Time.now.to_i+1})
   puts "Actor " + actor2.actor_type + " " + actor2.actor_id.to_s + " created."
 
+  puts "\nFinding singleton group for actor " + actor2.actor_type + " " + actor2.actor_id.to_s + "..."
+  group = actor2.singleton_group
+  puts "Singleton group " + group.code + " found."
+
   puts "\nCreating a group..."
   group = CgRoleClient::Group.create({:code => "test_group" + Time.now.to_i.to_s, :name => "Test group"})
   puts "Group " + group.id.to_s + " created."

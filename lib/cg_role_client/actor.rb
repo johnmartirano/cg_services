@@ -21,7 +21,7 @@ module CgRoleClient
     class << self
       include Aspect4r
 
-      around :create, :find_by_actor_type_and_actor_id, :method_name_arg => true do |method, *args, &block |
+      around :create, :find_by_actor_type_and_actor_id do | *args, &block |
         begin
           ensure_endpoint
           block.call(*args)
@@ -52,8 +52,8 @@ module CgRoleClient
     # with a group that only it is a member of.
     def singleton_group
       begin
-        ensure_endpoint
-        @endpoint.find_singleton_group_by_actor_id(@actor_id)
+        Actor.ensure_endpoint
+        Actor.endpoint.find_singleton_group_by_actor_id(@id)
       rescue Exception => e
         puts e
         raise
