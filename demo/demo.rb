@@ -98,7 +98,7 @@ def main
   puts "Testing if the role allows for read activity..."
   puts role.allows?(CgRoleClient::Activity.read)
 
-  puts "\nRemoving the actors in group " + group.code + "..."
+  puts "\nRemoving the actors from group " + group.code + "..."
   actors = group.actors
   result = group.remove(actor)
   puts "Actor " + actor.actor_type + " " + actor.actor_id.to_s + " removed from group " + group.id.to_s + "."
