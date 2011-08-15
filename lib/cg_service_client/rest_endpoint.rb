@@ -3,7 +3,7 @@ require 'typhoeus'
 module CgServiceClient
   # Generic base class for interacting with RESTFul service endpoints.
   class RestEndpoint
-    REQEUST_TIMEOUT = 5000 # milliseconds
+    REQUEST_TIMEOUT = 5000 # milliseconds
 
     attr_reader :uri, :version
 
