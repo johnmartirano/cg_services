@@ -1,5 +1,8 @@
 require 'rubygems'
-require 'bundler/setup'
+# Allows you to run without bundle exec, we do it here instead
+ENV['BUNDLE_GEMFILE'] ||= File.expand_path('../Gemfile', __FILE__)
+require 'bundler/setup' if File.exists?(ENV['BUNDLE_GEMFILE'])
+
 require 'erb'
 require 'active_record'
 require 'sinatra/base'
