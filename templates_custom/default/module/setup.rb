@@ -1,5 +1,5 @@
 def init
-  sections :header, :pre_docstring, T('docstring'), :children, 
+  sections T('docstring'), :children, 
   :method_summary, [:item_summary]
 end
 
