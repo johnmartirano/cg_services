@@ -96,6 +96,10 @@ def main
   role = CgRoleClient::Role.grant(role_type,actor,target)
   puts "Granted role ID is " + role.id.to_s
 
+  puts "\nFinding the targets of type 'CgDocument::Work' that actor " + actor.id.to_s + " has been granted access to."
+  targets = CgRoleClient::Target.find_by_target_type_and_actor("CgDocument::Work",actor)
+  puts "Found " + targets.size.to_s + " targets."
+
   puts "\nFinding role for the actor " + actor.id.to_s + " on the previous target..."
   role = CgRoleClient::Role.aggregate_role(actor,target)
   puts "Aggregate role contains " + role.roles.size.to_s + " roles"

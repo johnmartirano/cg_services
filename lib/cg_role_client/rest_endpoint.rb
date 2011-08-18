@@ -214,5 +214,22 @@ module CgRoleClient
       end
     end
 
+    def find_target_by_target_type_and_actor_type_and_actor_id(target_type,actor_type,actor_id)
+      request_url = uri_with_version + "targets/"
+      request = Typhoeus::Request.new(request_url,
+                                      :method => :get,
+                                      :headers => {"Accept" => "application/json"},
+                                      :params  => {:target_type => target_type,
+                                                   :actor_type => actor_type, :actor_id => actor_id},
+                                      :timeout => REQUEST_TIMEOUT)
+      targets = []
+      run_typhoeus_request(request) do |response|
+        decoded_target_ids = ActiveSupport::JSON.decode(response.body)
+        decoded_target_ids.each do |target_id|
+          targets << CgRoleClient::Target.new({:target_id => target_id, :target_type => target_type})
+        end
+      end
+      targets
+    end
   end
 end
