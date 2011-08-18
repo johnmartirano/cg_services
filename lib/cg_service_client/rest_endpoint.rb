@@ -13,6 +13,7 @@ module CgServiceClient
       @uri << '/' if @uri[-1].chr != '/'
         # to_s in case a number is passed in
       @version = version.to_s
+      @cache = CgServiceClient::Cache.new
     end
 
     def uri_with_version
@@ -35,7 +36,7 @@ module CgServiceClient
 
     protected
 
-    # Returns the result of the block on success.
+      # Returns the result of the block on success.
     def run_typhoeus_request(request)
       ret = nil
 
@@ -58,6 +59,15 @@ module CgServiceClient
       end
 
       hydra = Typhoeus::Hydra.new
+
+      hydra.cache_setter do |request|
+        @cache.set(request.cache_key, request.response, request.cache_timeout) if request.cache_timeout
+      end
+
+      hydra.cache_getter do |request|
+        @cache.get(request.cache_key) rescue nil
+      end
+
       hydra.queue(request)
       hydra.run
 
