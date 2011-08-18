@@ -8,14 +8,18 @@ module CgServiceClient
     @entries = Hash.new
     @entries_monitor = Monitor.new
 
+    class << self
+      attr_reader :entries_monitor, :entries
+    end
+
     def set(key, value, timeout)
-      @entries_monitor.synchronize do
+      Cache.entries_monitor.synchronize do
         Cache.entries.store(key, Entry.new(value, Time.now.to_i+timeout))
       end
     end
 
     def get(key)
-      @entries_monitor.synchronize do
+      Cache.entries_monitor.synchronize do
         Cache.entries.fetch(key, nil).value
       end
     end
@@ -32,7 +36,7 @@ module CgServiceClient
     Thread.new do
       loop do
         sleep CACHE_EXPIRY_INTERVAL_IN_SEC
-        @entries_monitor.synchronize do
+        Cache.entries_monitor.synchronize do
           Cache.entries.each_key do |key|
             if Time.now.to_i > Cache.entries.fetch(key).timeout
               Cache.entries.delete(key)
