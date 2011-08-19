@@ -120,8 +120,7 @@ module CgRoleClient
                                       :method => :get,
                                       :headers => {"Accept" => "application/json"},
                                       :params  => {:actor_type => actor_type, :actor_id => actor_id},
-                                      :timeout => REQUEST_TIMEOUT,
-                                      :cache_timeout => SECONDS_IN_A_DAY)
+                                      :timeout => REQUEST_TIMEOUT)
       run_typhoeus_request(request) do |response|
         CgRoleClient::Actor.new.from_json(response.body)
       end
