@@ -230,5 +230,16 @@ module CgRoleClient
       end
       targets
     end
+
+    def remove_role(role_id)
+      request_url = uri_with_version + "roles/" + role_id.to_s
+      request = Typhoeus::Request.new(request_url,
+                                      :method => :delete,
+                                      :headers => {"Accept" => "application/json", "Content-Type" => "application/json; charset=utf-8"},
+                                      :timeout => REQUEST_TIMEOUT)
+      run_typhoeus_request(request) do |response|
+        response.body
+      end
+    end
   end
 end

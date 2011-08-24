@@ -32,5 +32,15 @@ module CgRoleClient
     def roles
       @roles
     end
+
+    # Get the role that is associated with the specified
+    # role type name.
+    def role_for(role_name)
+      @roles.each do |role|
+        if role.role_type.role_name == role_name.gsub(/\b\w/){$&.upcase}
+          return role
+        end
+      end
+    end
   end
 end

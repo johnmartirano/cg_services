@@ -86,10 +86,10 @@ def main
   puts "Granted role ID is " + role.id.to_s
 
   puts "\nFinding role for group " + group.id.to_s + " on the previous target..."
-  role = CgRoleClient::Role.aggregate_role(group,target)
-  puts "Aggregate role contains " + role.roles.size.to_s + " roles"
+  aggregate_role = CgRoleClient::Role.aggregate_role(group,target)
+  puts "Aggregate role contains " + aggregate_role.roles.size.to_s + " roles"
   puts "Testing if the role allows for read activity..."
-  puts role.allows?(CgRoleClient::Activity.read)
+  puts aggregate_role.allows?(CgRoleClient::Activity.read)
 
   puts "\nGranting a reviewer role to actor " + actor.id.to_s + " for target " + target.class.to_s + " " + target.id.to_s + "..."
   role_type = CgRoleClient::RoleType.reviewer("CgDocument::Work")
@@ -101,10 +101,17 @@ def main
   puts "Found " + targets.size.to_s + " targets."
 
   puts "\nFinding role for the actor " + actor.id.to_s + " on the previous target..."
-  role = CgRoleClient::Role.aggregate_role(actor,target)
-  puts "Aggregate role contains " + role.roles.size.to_s + " roles"
+  aggregate_role = CgRoleClient::Role.aggregate_role(actor,target)
+  puts "Aggregate role contains " + aggregate_role.roles.size.to_s + " roles"
   puts "Testing if the role allows for read activity..."
-  puts role.allows?(CgRoleClient::Activity.read)
+  puts aggregate_role.allows?(CgRoleClient::Activity.read)
+
+  puts "\nRevoking the Reviewer role for actor " + actor.id.to_s + "..."
+  aggregate_role = CgRoleClient::Role.aggregate_role(actor,target)
+  role = aggregate_role.role_for("Reviewer")
+  role.revoke
+  aggregate_role = CgRoleClient::Role.aggregate_role(actor,target)
+  puts "Aggregate role contains " + aggregate_role.roles.size.to_s + " roles"
 
   puts "\nRemoving the actors from group " + group.code + "..."
   actors = group.actors
@@ -113,6 +120,7 @@ def main
   result = group.remove(actor2)
   puts "Actor " + actor2.actor_type + " " + actor2.actor_id.to_s + " removed from group " + group.id.to_s + "."
   puts "Group " + group.code + " contains " + group.actors.size.to_s + " actors."
+
 
 end
 
