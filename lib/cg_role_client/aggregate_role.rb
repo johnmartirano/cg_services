@@ -41,6 +41,8 @@ module CgRoleClient
           return role
         end
       end
+      # None of the roles matched the role type, so return nil
+      return nil
     end
   end
 end
