@@ -21,7 +21,7 @@ module CgRoleClient
     class << self
       include Aspect4r
 
-      around :create, :find_by_actor_type_and_actor_id do | *args, &block |
+      around :create, :find_by_actor_type_and_actor_id, :find_with_roles_on_target do | *args, &block |
         begin
           ensure_endpoint
           block.call(*args)
@@ -42,11 +42,16 @@ module CgRoleClient
       def find_by_actor_type_and_actor_id(actor_type, actor_id)
         @endpoint.find_actor_by_actor_type_and_actor_id(actor_type,actor_id)
       end
+
+      def find_with_roles_on_target(target_id, target_type)
+        @endpoint.find_with_roles_on_target(target_id, target_type)
+      end
     end
 
     def initialize(attributes = {})
       self.attributes = attributes
     end
+
 
     # Return this actor's singleton group. Each actor is associated
     # with a group that only it is a member of.
