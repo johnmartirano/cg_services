@@ -183,9 +183,7 @@ module CgRoleClient
                                       :timeout => REQUEST_TIMEOUT)
       actors = []
       run_typhoeus_request(request) do |response|
-
         decoded_actors = ActiveSupport::JSON.decode(response.body)
-        puts decoded_actors
         decoded_actors.each do |actor_attributes|
           actors << CgRoleClient::Actor.new(actor_attributes)
         end
