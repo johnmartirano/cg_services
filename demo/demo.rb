@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
 # If running this from the command line, make sure your working directory is the demo directory,
-# then run: ruby -I ../lib demo.rb
+# then run: bundle exec ruby -I ../lib demo.rb
 
 $: << File.expand_path(File.dirname(__FILE__) + '../../lib')
 
@@ -15,6 +15,7 @@ module CgDocument
     end
   end
 end
+
 
 # Demonstrates how to use the role service client with a single endpoint.
 # For this demo to work, you must first start up an instance of the lookup
@@ -99,6 +100,10 @@ def main
   puts "\nFinding the targets of type 'CgDocument::Work' that actor " + actor.id.to_s + " has been granted access to."
   targets = CgRoleClient::Target.find_by_target_type_and_actor("CgDocument::Work",actor)
   puts "Found " + targets.size.to_s + " targets."
+
+  puts "\nFinding the actors who have a role on target " + target.class.to_s + " " + target.to_s
+  actors = CgRoleClient::Actor.find_with_roles_on_target(target.id, target.class)
+  puts "Found " + actors.size.to_s + " actors."
 
   puts "\nFinding role for the actor " + actor.id.to_s + " on the previous target..."
   aggregate_role = CgRoleClient::Role.aggregate_role(actor,target)
