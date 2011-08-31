@@ -182,12 +182,17 @@ module CgRoleClient
                                       :headers => {"Accept" => "application/json"},
                                       :timeout => REQUEST_TIMEOUT)
       actors = []
-      run_typhoeus_request(request) do |response|
-        decoded_actors = ActiveSupport::JSON.decode(response.body)
-        decoded_actors.each do |actor_attributes|
-          actors << CgRoleClient::Actor.new(actor_attributes)
+      begin
+        run_typhoeus_request(request) do |response|
+          decoded_actors = ActiveSupport::JSON.decode(response.body)
+          decoded_actors.each do |actor_attributes|
+            actors << CgRoleClient::Actor.new(actor_attributes)
+          end
         end
+      rescue ::CgServiceClient::Exceptions::ClientError => e
+        raise unless e.http_code == 404
       end
+
       actors
     end
 
