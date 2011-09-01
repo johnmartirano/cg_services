@@ -4,7 +4,7 @@ $:.unshift lib unless $:.include?(lib)
 
 Gem::Specification.new do |s|
   s.name        = "cg_service"
-  s.version = "0.6.6"
+  s.version = "0.6.7"
   s.platform    = Gem::Platform::RUBY
   s.authors     = ["CG Labs"]
   s.email       = ["eng@commongroundpublishing.com"]
