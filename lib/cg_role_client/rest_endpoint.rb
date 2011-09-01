@@ -93,11 +93,15 @@ module CgRoleClient
                                       :timeout => REQUEST_TIMEOUT)
 
       roles = []
-      run_typhoeus_request(request) do |response|
-        decoded_roles = ActiveSupport::JSON.decode(response.body)
-        decoded_roles.each do |role_attributes|
-          roles << CgRoleClient::Role.new(role_attributes)
+      begin
+        run_typhoeus_request(request) do |response|
+          decoded_roles = ActiveSupport::JSON.decode(response.body)
+          decoded_roles.each do |role_attributes|
+            roles << CgRoleClient::Role.new(role_attributes)
+          end
         end
+      rescue ::CgServiceClient::Exceptions::ClientError => e
+        raise unless e.http_code == 404
       end
       roles
     end
@@ -246,11 +250,15 @@ module CgRoleClient
                                                    :actor_type => actor_type, :actor_id => actor_id},
                                       :timeout => REQUEST_TIMEOUT)
       targets = []
-      run_typhoeus_request(request) do |response|
-        decoded_target_ids = ActiveSupport::JSON.decode(response.body)
-        decoded_target_ids.each do |target_id|
-          targets << CgRoleClient::Target.new({:target_id => target_id, :target_type => target_type})
+      begin
+        run_typhoeus_request(request) do |response|
+          decoded_target_ids = ActiveSupport::JSON.decode(response.body)
+          decoded_target_ids.each do |target_id|
+            targets << CgRoleClient::Target.new({:target_id => target_id, :target_type => target_type})
+          end
         end
+      rescue ::CgServiceClient::Exceptions::ClientError => e
+        raise unless e.http_code == 404
       end
       targets
     end
