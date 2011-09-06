@@ -48,7 +48,7 @@ module CgLookupClient
           CgLookupClient::RestEndpoint.new("http://localhost:5000/", "1"))
         if !supported_endpoint_version?(endpoint.version)
           raise UnsupportedEndpointVersionError, \
-          "Version #{endpoint.version} endpoints are not supported."
+                       "Version #{endpoint.version} endpoints are not supported."
         end
 
         @endpoints.add(endpoint)
@@ -180,7 +180,7 @@ module CgLookupClient
 
     def self.ensure_configured
       if @endpoints.empty?
-        raise "No endpoints are configured. Call Entry.configure_endpoint first."
+        raise ::CgLookupClient::NoEndpointConfiguredError, "No endpoints are configured. Call Entry.configure_endpoint first."
       end
     end
 
@@ -257,5 +257,8 @@ module CgLookupClient
 
     # Error for when user attempts to configure an unsupported endpoint version.
   class UnsupportedEndpointVersionError < StandardError;
+  end
+
+  class NoEndpointConfiguredError < StandardError;
   end
 end
