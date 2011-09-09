@@ -10,6 +10,7 @@ group :development, :test do
   gem 'cg_capistrano', '~>0.1.41'
   gem 'capistrano'
   gem 'capistrano_database_yml'
+  gem 'sqlite3-ruby', '=1.2.5', :require => 'sqlite3'
 end
 
 group :test do
