@@ -19,3 +19,7 @@ group :test do
   gem 'ruby-debug-base19x'
   gem 'ruby-debug-ide'
 end
+
+group :deployment do
+  gem 'unicorn'
+end
