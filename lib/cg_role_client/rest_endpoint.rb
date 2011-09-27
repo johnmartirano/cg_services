@@ -131,7 +131,7 @@ module CgRoleClient
     end
 
     def find_role_type_by_role_name_and_target_type(role_name, target_type)
-      request_url = uri_with_version + "roles/types/" + role_name.to_s.capitalize
+      request_url = uri_with_version + "roles/types/" + role_name.to_s.camelcase
       request = Typhoeus::Request.new(request_url,
                                       :method => :get,
                                       :headers => {"Accept" => "application/json"},
