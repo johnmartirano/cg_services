@@ -37,7 +37,11 @@ module CgServiceClient
     protected
 
       # Returns the result of the block on success.
-    def run_typhoeus_request(request)
+      # Options:
+      #     :cache_404_responses Whether or not to cache responses that return a 404
+    def run_typhoeus_request(request, options = {})
+      options = {:only_cache_200s => true}.merge(options)
+
       ret = nil
 
       request.on_complete do |response|
@@ -61,7 +65,9 @@ module CgServiceClient
       hydra = Typhoeus::Hydra.new
 
       hydra.cache_setter do |request|
-        @cache.set(request.cache_key, request.response, request.cache_timeout) if request.cache_timeout
+        if(request.cache_timeout && cacheable?(request, options))
+          @cache.set(request.cache_key, request.response, request.cache_timeout)
+        end
       end
 
       hydra.cache_getter do |request|
@@ -72,6 +78,11 @@ module CgServiceClient
       hydra.run
 
       ret
+    end
+
+    def cacheable?(request, options)
+      !options[:only_cache_200s] ||
+          (options[:only_cache_200s] && request.response.code >= 200 && request.response.code < 300)
     end
   end
 
