@@ -20,8 +20,7 @@ module CgRoleClient
     class << self
       include Aspect4r
 
-      around :grant, :aggregate_role do |*args,
-        &block |
+      around :grant, :aggregate_role do |*args, &block |
         begin
           ensure_endpoint
           block.call(*args)
