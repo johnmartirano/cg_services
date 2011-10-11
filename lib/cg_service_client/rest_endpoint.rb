@@ -38,7 +38,7 @@ module CgServiceClient
 
       # Returns the result of the block on success.
       # Options:
-      #     :cache_404_responses Whether or not to cache responses that return a 404
+      #     :only_cache_200s Whether or not to only cache responses that return a 200
     def run_typhoeus_request(request, options = {})
       options = {:only_cache_200s => true}.merge(options)
 
