@@ -46,6 +46,15 @@ module CgRoleClient
       def find_with_roles_on_target(target_id, target_type)
         @endpoint.find_with_roles_on_target(target_id, target_type)
       end
+
+      def find_with_roles_on_target_with_activity(target, activity)
+        actors = self.find_with_roles_on_target(target.id, target.class.name)
+        users = actors.select do |a|
+          user = CgUser::User.find(a.actor_id)
+          aggregate_role = CgRoleClient::Role.aggregate_role(user, target)
+          user if aggregate_role.allows?(activity)
+        end
+      end
     end
 
     def initialize(attributes = {})
