@@ -21,7 +21,7 @@ module CgRoleClient
     class << self
       include Aspect4r
 
-      around :create, :find_by_actor_type_and_actor_id, :find_with_roles_on_target do | *args, &block |
+      around :create, :find_by_actor_type_and_actor_id, :find_with_roles_on_target, :find_by_target_with_activities do | *args, &block |
         begin
           ensure_endpoint
           block.call(*args)
@@ -47,6 +47,16 @@ module CgRoleClient
         @endpoint.find_with_roles_on_target(target_id, target_type)
       end
 
+      # Get all the actors with an activity on a target
+      # @param target object
+      # @param an Array of Activity
+      # @returns an array of Actor
+      def find_by_target_with_activities(target, activities)
+        target_id = target.id.to_s
+        target_type = target.class.name
+        activity_ids = activities.map &:id
+        @endpoint.find_actors_by_target_and_target_type_and_activities(target_id, target_type, activity_ids)
+      end
     end
 
     def initialize(attributes = {})

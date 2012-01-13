@@ -274,5 +274,27 @@ module CgRoleClient
         response.body
       end
     end
+
+    def find_actors_by_target_and_target_type_and_activities(target_id, target_type, activity_ids)
+      request_url = uri_with_version + "targets/" + target_id + "/actors_with_activities"
+      request = Typhoeus::Request.new(request_url,
+                                     :method => :get,
+                                     :headers => {"Accept" => "application/json"},
+                                     :params => {:activities => activity_ids.to_json,
+                                                 :target_type => target_type},
+                                     :timeout => REQUEST_TIMEOUT)
+      actors = []
+      begin
+        run_typhoeus_request(request) do |response|
+          decoded_actors = ActiveSupport::JSON.decode(response.body)
+          decoded_actors.each do |actor_attributes|
+            actors << CgRoleClient::Actor.new(actor_attributes)
+          end
+        end
+      rescue ::CgServiceClient::Exceptions::ClientError => e
+        raise unless e.http_code == 404
+      end
+      actors
+    end
   end
 end
