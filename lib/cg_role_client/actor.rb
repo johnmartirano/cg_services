@@ -52,6 +52,8 @@ module CgRoleClient
       # @param an Array of Activity
       # @returns an array of Actor
       def find_by_target_with_activities(target, activities)
+        return [] if target.nil?
+
         target_id = target.id.to_s
         target_type = target.class.name
         activity_ids = activities.map &:id
