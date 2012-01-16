@@ -3,9 +3,11 @@ require 'typhoeus'
 module CgServiceClient
   # Generic base class for interacting with RESTFul service endpoints.
   class RestEndpoint
+    include Exceptions
+
     REQUEST_TIMEOUT = 10000 # milliseconds
 
-    attr_reader :uri, :version
+    attr_reader :uri, :version, :hydra
 
     def initialize(uri, version)
       @uri = uri
@@ -13,7 +15,26 @@ module CgServiceClient
       @uri << '/' if @uri[-1].chr != '/'
         # to_s in case a number is passed in
       @version = version.to_s
-      @cache = CgServiceClient::Cache.new
+      @cache = Cache.new
+
+      @hydra = Typhoeus::Hydra.new
+
+      # Note: previously, a (default on) option to
+      # #run_typhoeus_request determined whether to only cache 200
+      # level responses.  But since I'm now re-using the same Hydra
+      # (rather than creating a new one for each request), I'm just
+      # hardcoding this to always only cache 200 level responses.
+      # (There was no code that requested anything but the default
+      # behavior anyway.)
+      @hydra.cache_setter do |req|
+        if req.response.code >= 200 && req.response.code < 300
+          @cache.set(req.cache_key, req.response, req.cache_timeout)
+        end
+      end
+
+      @hydra.cache_getter do |req|
+        @cache.get(req.cache_key) rescue nil
+      end
     end
 
     def uri_with_version
@@ -36,53 +57,34 @@ module CgServiceClient
 
     protected
 
-      # Returns the result of the block on success.
-      # Options:
-      #     :only_cache_200s Whether or not to only cache responses that return a 200
-    def run_typhoeus_request(request, options = {})
-      options = {:only_cache_200s => true}.merge(options)
-
-      ret = nil
-
-      request.on_complete do |response|
-        if response.success?
-          ret = yield response
-        elsif response.code >= 400 && response.code < 500
-          raise CgServiceClient::Exceptions::ClientError.new(response.code, response.status_message), "Client error #{response.code}: #{response.body}."
-        elsif response.code >= 500
-          raise CgServiceClient::Exceptions::ServerError.new(response.code, response.status_message), "Server error #{response.code}: #{response.body}."
-        elsif response.code == 0
-          # no http response
-          raise CgServiceClient::Exceptions::ConnectionError.new(response.curl_return_code, response.curl_error_message), response.curl_error_message
-        elsif response.timed_out?
-          raise CgServiceClient::Exceptions::TimeoutError.new(response.curl_return_code, response.curl_error_message), "Request for #{request_url} timed out."
+    # @returns [Object] the result of the block
+    def run_typhoeus_request(request)
+      request.on_complete do |resp|
+        if resp.success?
+          yield resp
+        elsif resp.code >= 400 && resp.code < 500
+          raise(ClientError.new(resp.code, resp.status_message),
+                "Client error #{resp.code}: #{resp.body}.")
+        elsif resp.code >= 500
+          raise(ServerError.new(resp.code, resp.status_message),
+                "Server error #{resp.code}: #{resp.body}.")
+        elsif resp.code == 0
+          # no http resp
+          raise(ConnectionError.new(resp.curl_return_code, resp.curl_error_message),
+                resp.curl_error_message)
+        elsif resp.timed_out?
+          raise(TimeoutError.new(resp.curl_return_code, resp.curl_error_message),
+                "Request for #{request_url} timed out.")
         else
-          raise CgServiceClient::Exceptions::ConnectionError.new(response.code, response.body), "Request for #{request_url} failed."
+          raise(ConnectionError.new(resp.code, resp.body),
+                "Request for #{request_url} failed.")
         end
-
-      end
-
-      hydra = Typhoeus::Hydra.new
-
-      hydra.cache_setter do |request|
-        if(request.cache_timeout && cacheable?(request, options))
-          @cache.set(request.cache_key, request.response, request.cache_timeout)
-        end
-      end
-
-      hydra.cache_getter do |request|
-        @cache.get(request.cache_key) rescue nil
       end
 
       hydra.queue(request)
       hydra.run
-
-      ret
-    end
-
-    def cacheable?(request, options)
-      !options[:only_cache_200s] ||
-          (options[:only_cache_200s] && request.response.code >= 200 && request.response.code < 300)
+      
+      request.handled_response
     end
   end
 
