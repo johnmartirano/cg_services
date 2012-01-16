@@ -201,6 +201,29 @@ module CgRoleClient
       actors
     end
 
+    def find_targets_with_activities_for_this_actor(actor_id, activities, target_types, actor_type)
+      request_url = uri_with_version + "actors/" + actor_id.to_s + "/targets_with_activities"
+      request = Typhoeus::Request.new(request_url,
+                                      :params => { "activities[]" => activities,
+                                      # role_service drops a parameter instead of detecting the array if it receives ?activities=foo&activities=bar
+                                      # it requires instead the nonstandard ?activities[]=foo&activities[]=bar
+                                      # :symbols cannot contain "[]", so use strings
+                                      # see http://groups.google.com/group/typhoeus/browse_thread/thread/94a5ebf3c226acde?pli=1
+                                      # and Typhoeus::Utils param string methods
+                                      "target_types[]" => target_types,
+                                      :actor_type => actor_type },
+                                      :timeout => REQUEST_TIMEOUT)
+      targets = []
+      begin
+        run_typhoeus_request(request) do |response|
+          decoded_targets = ActiveSupport::JSON.decode(response.body)
+          targets = decoded_targets.map { |target_attributes| CgRoleClient::Target.new(target_attributes) }
+        end
+      rescue ::CgServiceClient::Exceptions::ClientError => e
+        raise unless e.http_code == 404
+      end
+    end
+
 
     def find_group_actors_by_group_id(id)
       request_url = uri_with_version + "groups/" + id.to_s + "/actors"
