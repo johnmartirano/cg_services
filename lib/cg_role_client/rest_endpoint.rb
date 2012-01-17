@@ -201,18 +201,22 @@ module CgRoleClient
       actors
     end
 
-    def find_targets_with_activities_for_this_actor(actor_id, activities, target_types, actor_type)
-      request_url = uri_with_version + "actors/" + actor_id.to_s + "/targets_with_activities"
+    def find_targets_with_activities_for_this_actor(actor, activity_ids, target_type_strings)
+      request_url = uri_with_version + "actors/" + actor.id.to_s + "/targets_with_activities"
       request = Typhoeus::Request.new(request_url,
-                                      :params => { "activities[]" => activities,
+                                      :method => :get,
+                                      :headers => {"Accept" => "application/json"},
+                                      :params => { :activities => activity_ids.to_json,#get around passing array by passing a string representation of it
                                       # role_service drops a parameter instead of detecting the array if it receives ?activities=foo&activities=bar
                                       # it requires instead the nonstandard ?activities[]=foo&activities[]=bar
                                       # :symbols cannot contain "[]", so use strings
                                       # see http://groups.google.com/group/typhoeus/browse_thread/thread/94a5ebf3c226acde?pli=1
                                       # and Typhoeus::Utils param string methods
-                                      "target_types[]" => target_types,
-                                      :actor_type => actor_type },
-                                      :timeout => REQUEST_TIMEOUT)
+                                      :target_types => target_type_strings.to_json,
+                                      :actor_type => actor.actor_type },
+                                      :timeout => REQUEST_TIMEOUT,
+                                      :cache_timeout => SECONDS_IN_A_DAY)
+      #cache_timeout?
       targets = []
       begin
         run_typhoeus_request(request) do |response|
