@@ -28,7 +28,14 @@ module CgRoleClient
       # such as, Activity.read, Activity.write, etc.
       def method_missing(sym, *args, &block)
         begin
-          endpoint.find_activity_by_code(sym.to_s)
+          # TODO: Should there be a more general-use cache for caching
+          # parsed JSON (rather than simply caching the unparsed
+          # HTTP response string).
+          #
+          # Putting this one in since the activities are used in many
+          # places and they never change.
+          @cache ||= {}
+          @cache[sym.to_s] ||= endpoint.find_activity_by_code(sym.to_s)
         rescue Exception => e
           puts e
           raise
