@@ -215,7 +215,7 @@ module CgRoleClient
                                       :target_types => target_type_strings.to_json,
                                       :actor_type => actor.actor_type },
                                       :timeout => REQUEST_TIMEOUT,
-                                      :cache_timeout => SECONDS_IN_A_DAY)
+                                      :cache_timeout => 5 * 60) # set the cache timeout to 5 minutes, since search is what uses this and its cache times out at 5 minutes
       #cache_timeout?
       targets = []
       begin
