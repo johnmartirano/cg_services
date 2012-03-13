@@ -107,8 +107,13 @@ module CgService
     # Configure log4j logger - intended to work only in JRuby(uses Log4J)
     def configure_logger(logger_config_file)
       cattr_accessor :logger
-      require 'log4j_logger'
-      self.logger = Log4jLogger.new logger_config_file
+      if RUBY_PLATFORM =~ /java/
+        require 'log4j_logger'
+        self.logger = Log4jLogger.new logger_config_file
+      else
+        require 'logger'
+        self.logger = Logger.new(STDOUT)
+      end
       ActiveRecord::Base.logger = logger
     end
 

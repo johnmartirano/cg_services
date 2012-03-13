@@ -34,8 +34,8 @@ class Log4jLogger
   end
 
   def level=(level)
-    raise "Invalid log level" unless SEVERETIES[level.to_i]
-    @root.setLevel(SEVERETIES[level.to_i])
+    raise "Invalid log level" unless SEVERETIES[level]
+    @root.setLevel(SEVERETIES[level])
   end
 
   def enabled_for?(severity)
