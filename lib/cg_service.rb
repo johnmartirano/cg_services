@@ -104,7 +104,7 @@ module CgService
       end
     end
 
-    # Configure log4j logger
+    # Configure log4j logger - intended to work only in JRuby(uses Log4J)
     def configure_logger(logger_config_file)
       cattr_accessor :logger
       require 'log4j_logger'
