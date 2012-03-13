@@ -109,6 +109,7 @@ module CgService
       cattr_accessor :logger
       require 'log4j_logger'
       self.logger = Log4jLogger.new logger_config_file
+      ActiveRecord::Base.logger = logger
     end
 
     # Configure sinatra reloader for a particular environment, defaults to development.
