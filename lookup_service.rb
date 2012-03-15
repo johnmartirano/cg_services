@@ -22,13 +22,26 @@ module CgLookupService
     configure do
       env_arg_idx = ARGV.index("-e")
       env_arg = ARGV[env_arg_idx+1] unless env_arg_idx == nil
-      env = env_arg || ENV["SINATRA_ENV"] || "development"
+      env = env_arg || ENV["RACK_ENV"] ||ENV["SINATRA_ENV"] || "development"
       databases = YAML.load_file(File.expand_path(File.dirname(__FILE__) + "/config/database.yml"))
       # databases = YAML.load_file("config/database.yml")
       ActiveRecord::Base.establish_connection(databases[env])
       ActiveRecord::Base.include_root_in_json = false
     end
 
+    # Configure logger
+    configure do
+      cattr_accessor :logger
+      if RUBY_PLATFORM =~ /java/
+        require 'log4j_logger'
+        self.logger = Log4jLogger.new (File.expand_path(File.dirname(__FILE__) + "/config/log4j.properties"))
+      else
+        require 'logger'
+        self.logger = Logger.new(STDOUT)
+      end
+      ActiveRecord::Base.logger = logger
+
+    end
     # Configure expiration thread
     configure do
       app_config = YAML.load_file(File.dirname(__FILE__) + "/config/service.yml")
