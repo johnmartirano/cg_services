@@ -184,7 +184,7 @@ module CgService
     # Start a thread that will register with a lookup service according
     # to +host+, +port+, and various keys in +config+, which may be a
     # Hash or a string filename that will be loaded using YAML.load_file
-    # This method is deprecated, please use +init_registration_thread+ instead
+    # This method is deprecated, please use +init_registration_thread+ instead.
     def start_registration_thread(host, port, config)
       CgService.start_registration_thread(host, port, config)
     end
