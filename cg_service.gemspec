@@ -12,7 +12,12 @@ Gem::Specification.new do |s|
   s.summary     = ""
 
   s.add_dependency 'activerecord', '~> 3.0.6'
-  unless RUBY_PLATFORM =~ /java/
+  if RUBY_PLATFORM =~ /java/
+    s.add_dependency 'activerecord-jdbc-adapter', '1.2.1'
+    s.add_dependency 'activerecord-jdbcpostgresql-adapter'
+    s.add_dependency 'jdbc-postgres'
+    s.add_dependency 'jruby-openssl'
+  else
 	  s.add_dependency 'pg'
   	s.add_dependency 'thin', '1.2.8'
 	end
