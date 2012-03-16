@@ -8,8 +8,6 @@ group :development, :test do
     gem 'tux'
     gem 'sqlite3'
   end
-  gem 'cg_capistrano', '~> 0.1.79'
-  gem 'capistrano_database_yml'
   gem 'warbler', '1.3.2' if RUBY_PLATFORM =~ /java/
 end
 
