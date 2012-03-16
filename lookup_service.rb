@@ -88,6 +88,10 @@ module CgLookupService
       puts request.request_method + "  " + request.url + "  " + request.ip
     end
 
+    after do
+      ActiveRecord::Base.clear_active_connections!
+    end
+
     # get the service documentation
     get '/v1/doc/?', :provides => 'html' do
       @title = 'CG Lookup Service Documentation'
