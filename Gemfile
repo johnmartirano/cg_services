@@ -7,6 +7,8 @@ group :development, :test do
   unless RUBY_PLATFORM =~/java/
     gem 'tux'
     gem 'sqlite3'
+	else
+		gem 'jruby-openssl'
   end
   gem 'warbler', '1.3.2' if RUBY_PLATFORM =~ /java/
 end
