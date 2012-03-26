@@ -10,6 +10,7 @@ group :development, :test do
 	else
 		gem 'jruby-openssl'
   end
+  gem 'cg_tasks', '~> 1.1.1'
   gem 'warbler', '1.3.2' if RUBY_PLATFORM =~ /java/
 end
 
