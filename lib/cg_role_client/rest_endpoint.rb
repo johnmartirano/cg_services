@@ -106,6 +106,28 @@ module CgRoleClient
       roles
     end
 
+    def find_actor_roles_on_target(actor_id, target_type, target_id)
+      request_url = uri_with_version + "actors/" + actor_id.to_s + "/roles/"
+      request = Typhoeus::Request.new(request_url,
+                                      :method => :get,
+                                      :headers => {"Accept" => "application/json"},
+                                      :params  => {:target_type => target_type, :target_id => target_id},
+                                      :timeout => REQUEST_TIMEOUT)
+
+      roles = []
+      begin
+        run_typhoeus_request(request) do |response|
+          decoded_roles = ActiveSupport::JSON.decode(response.body)
+          decoded_roles.each do |role_attributes|
+            roles << CgRoleClient::Role.new(role_attributes)
+          end
+        end
+      rescue ::CgServiceClient::Exceptions::ClientError => e
+        raise unless e.http_code == 404
+      end
+      roles
+    end
+
     def create_actor(actor)
       request_url = uri_with_version + "actors/"
       request = Typhoeus::Request.new(request_url,
@@ -161,8 +183,13 @@ module CgRoleClient
                                       :method => :get,
                                       :headers => {"Accept" => "application/json"},
                                       :timeout => REQUEST_TIMEOUT)
-      run_typhoeus_request(request) do |response|
-        CgRoleClient::Group.new.from_json(response.body)
+      begin
+        run_typhoeus_request(request) do |response|
+          CgRoleClient::Group.new.from_json(response.body)
+        end
+      rescue ::CgServiceClient::Exceptions::ClientError => e
+        raise unless e.http_code == 404
+        nil
       end
     end
 
