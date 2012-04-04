@@ -62,7 +62,7 @@ module CgService
       begin
         YARD::Tags::Library.define_tag('', :request_param, :with_types_and_name)
         YARD::Tags::Library.define_tag('', :request_body, :with_types_and_name)
-        YARD::Registry.load([self.class.auto_doc_file], true)
+        YARD::Registry.load([settings.app_file], true)
         template_path = File.join(File.dirname(__FILE__), '../../templates_custom')
         YARD::Templates::Engine.register_template_path(template_path)
         YARD::Templates::Engine.render(:object => YARD::Registry.resolve(nil, self.class.to_s),

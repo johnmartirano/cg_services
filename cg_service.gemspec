@@ -4,7 +4,7 @@ $:.unshift lib unless $:.include?(lib)
 
 Gem::Specification.new do |s|
   s.name        = "cg_service"
-  s.version = "0.6.20"
+  s.version     = "0.7.0"
   s.platform    = Gem::Platform::RUBY
   s.authors     = ["CG Labs"]
   s.email       = ["eng@commongroundpublishing.com"]
@@ -18,9 +18,9 @@ Gem::Specification.new do |s|
     s.add_dependency 'jdbc-postgres'
     s.add_dependency 'jruby-openssl'
   else
-	  s.add_dependency 'pg'
-  	s.add_dependency 'thin', '1.2.8'
-	end
+    s.add_dependency 'pg'
+    s.add_dependency 'thin', '1.2.8'
+  end
   s.add_dependency 'sinatra', '>= 1.2.1'
   s.add_dependency 'sinatra-reloader'
   s.add_dependency 'json', '>=1.4.6'
