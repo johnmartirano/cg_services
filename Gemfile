@@ -4,6 +4,9 @@ source 'http://build.commongroundpublishing.com/gems'
 gemspec
 
 group :development, :test do
+  gem 'rake', '= 0.8.7'         # for compatibility with other cg
+                                # stuff and to avoid bundler
+                                # NP-forever
   gem 'tux'
   gem 'sqlite3', :require => 'sqlite3'
 end
