@@ -1,7 +1,8 @@
 source 'http://rubygems.org'
 source 'http://build.commongroundpublishing.com/gems'
 
-gem 'cg_service', '0.6.18'
+gem 'cg_service', '0.7.0'
+# gem 'cg_service', :path => '../cg_service'
 
 if RUBY_PLATFORM =~ /java/
   gem 'activerecord-jdbcpostgresql-adapter'
@@ -13,7 +14,7 @@ group :development, :test do
     gem 'tux'
     gem 'sqlite3'
   end
-  gem 'cg_tasks', '~> 1.1.1'
+  gem 'cg_tasks', '~> 1.1.3'
   gem 'warbler', '1.3.2' if RUBY_PLATFORM =~ /java/
 end
 

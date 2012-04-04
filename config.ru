@@ -1,7 +1,12 @@
-require 'rubygems'
 require "#{File.expand_path(File.dirname(__FILE__))}/lookup_service.rb"
 
-CgLookupService::App.set :run, false   # disable built-in sinatra web server
-CgLookupService::App.set :environment, :development
+if RUBY_PLATFORM =~ /java/
+  run CgLookupService::App
+else
+  # Make app available at '/' and '/lookup_service' for backward
+  # compatibility during the transition to JRuby.
+  app = CgLookupService::App.new
+  run Rack::URLMap.new(CgLookupService::App.settings.context_root => app,
+                       '/' => app)
+end
 
-run CgLookupService::App

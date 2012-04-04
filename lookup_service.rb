@@ -3,54 +3,25 @@ require 'rubygems'
 ENV['BUNDLE_GEMFILE'] ||= File.expand_path('../Gemfile', __FILE__)
 require 'bundler/setup' if File.exists?(ENV['BUNDLE_GEMFILE'])
 
-require 'erb'
 require 'active_record'
+require 'cg_service'
+require 'erb'
 require 'sinatra/base'
 
 require "#{File.expand_path(File.dirname(__FILE__))}/models/entry"
 
 module CgLookupService
   class App < Sinatra::Base
-    # Configure port
     configure do
-      port_arg_idx = ARGV.index("-p")
-      port_arg = ARGV[port_arg_idx+1] unless port_arg_idx == nil
-      set :port, port_arg || 5000
+      set :root => File.dirname(__FILE__)
+      set :app_file => __FILE__
     end
 
-    # Configure database
-    configure do
-      env_arg_idx = ARGV.index("-e")
-      env_arg = ARGV[env_arg_idx+1] unless env_arg_idx == nil
-      env = env_arg || ENV["RACK_ENV"] ||ENV["SINATRA_ENV"] || "development"
-      databases = YAML.load_file(File.expand_path(File.dirname(__FILE__) + "/config/database.yml"))
-      # databases = YAML.load_file("config/database.yml")
-      ActiveRecord::Base.establish_connection(databases[env])
-      ActiveRecord::Base.include_root_in_json = false
-    end
+    extend CgService
 
-    # Configure logger
-    configure do
-      cattr_accessor :logger
-      if RUBY_PLATFORM =~ /java/
-        require 'log4j_logger'
-        self.logger = Log4jLogger.new (File.expand_path(File.dirname(__FILE__) + "/config/log4j.properties"))
-      else
-        require 'logger'
-        self.logger = Logger.new(STDOUT)
-      end
-      ActiveRecord::Base.logger = logger
-
-    end
     # Configure expiration thread
     configure do
-      app_config = YAML.load_file(File.dirname(__FILE__) + "/config/service.yml")
-      #app_config = YAML.load_file("config/service.yml")
-      set :app_file, __FILE__
       set :db_lock, Mutex.new
-      set :lease_time_in_sec => app_config["lease_time_in_sec"]
-      set :lease_expiry_interval_in_sec =>
-              app_config["lease_expiry_interval_in_sec"]
 
       puts "|| CG Lookup Service is starting up..."
       puts "|| Lease time set to " + \
@@ -72,24 +43,6 @@ module CgLookupService
           end
         end
       end
-
-    end
-
-    configure(:development) do
-      begin
-        require 'sinatra/reloader'
-        register Sinatra::Reloader
-      rescue LoadError
-        puts("Install sinatra-reloader gem.")
-      end
-    end
-
-    before do
-      puts request.request_method + "  " + request.url + "  " + request.ip
-    end
-
-    after do
-      ActiveRecord::Base.clear_active_connections!
     end
 
     # get the service documentation
@@ -185,6 +138,3 @@ module CgLookupService
   end
 
 end
-
-__END__
-
