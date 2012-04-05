@@ -342,7 +342,7 @@ module CgRoleClient
                          :timeout => REQUEST_TIMEOUT}
       actors = []
       begin
-        run_request(request_url, request) do |response|
+        run_request(request_url, request_options) do |response|
           decoded_actors = ActiveSupport::JSON.decode(response.body)
           decoded_actors.each do |actor_attributes|
             actors << CgRoleClient::Actor.new(actor_attributes)
