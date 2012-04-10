@@ -4,7 +4,7 @@ $:.unshift lib unless $:.include?(lib)
 
 Gem::Specification.new do |s|
   s.name        = "cg_service_client"
-  s.version = "0.5.46"
+  s.version     = "0.6.0"
   s.platform    = Gem::Platform::RUBY
   s.authors     = ["CG Labs"]
   s.email       = ["eng@commongroundpublishing.com"]
@@ -16,7 +16,6 @@ Gem::Specification.new do |s|
   s.add_dependency "activemodel", ">= 3.0.0"
   s.add_dependency "activesupport", ">= 3.0.0"
   s.add_dependency "cg_lookup_client", "~> 0.5.16"
-  s.add_dependency "typhoeus", ">= 0.2.4"
 
   s.files        = Dir.glob("{lib,spec}/**/*")
 
