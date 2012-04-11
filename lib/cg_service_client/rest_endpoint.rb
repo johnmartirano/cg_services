@@ -1,5 +1,3 @@
-#require 'typhoeus'
-
 module CgServiceClient
   # Generic base class for interacting with RESTFul service endpoints.
   class RestEndpoint
@@ -37,21 +35,16 @@ module CgServiceClient
     protected
 
     def run_request(request_url, request_options = {}, options = {}, &block)
-			if defined?(JRUBY_VERSION)
-        run_rest_client_request(request_url, request_options, options, &block)
-			else
-			  request = Typhoeus::Request.new(request_url, request_options)
-				run_typhoeus_request(request, options, &block)
-			end
+      run_rest_client_request(request_url, request_options, options, &block)
     end
 
     def rest_client_cache_key(url)
-			Digest::SHA1.hexdigest(url)
+      Digest::SHA1.hexdigest(url)
     end
 
-		def run_rest_client_request(request_url, request_options = {}, options = {}, &block)
-			options = {:only_cache_200s => true}.merge(options)
-
+    def run_rest_client_request(request_url, request_options = {}, options = {}, &block)
+      options = {:only_cache_200s => true}.merge(options)
+      
       if request_options[:method] == :get
         response = @cache.get(rest_client_cache_key(request_url)) rescue nil
       end
@@ -91,54 +84,10 @@ module CgServiceClient
       else
         raise CgServiceClient::Exceptions::ConnectionError.new(response.code, response.body), "Request for #{request_url} failed."
       end
-
-			ret
-		end
-
-      # Returns the result of the block on success.
-      # Options:
-      #     :only_cache_200s Whether or not to only cache responses that return a 200
-    def run_typhoeus_request(request, options = {})
-      options = {:only_cache_200s => true}.merge(options)
-
-      ret = nil
-
-      request.on_complete do |response|
-        if response.success?
-          ret = yield response
-        elsif response.code >= 400 && response.code < 500
-          raise CgServiceClient::Exceptions::ClientError.new(response.code, response.status_message), "Client error #{response.code}: #{response.body}."
-        elsif response.code >= 500
-          raise CgServiceClient::Exceptions::ServerError.new(response.code, response.status_message), "Server error #{response.code}: #{response.body}."
-        elsif response.code == 0
-          # no http response
-          raise CgServiceClient::Exceptions::ConnectionError.new(response.curl_return_code, response.curl_error_message), response.curl_error_message
-        elsif response.timed_out?
-          raise CgServiceClient::Exceptions::TimeoutError.new(response.curl_return_code, response.curl_error_message), "Request for #{request_url} timed out."
-        else
-          raise CgServiceClient::Exceptions::ConnectionError.new(response.code, response.body), "Request for #{request_url} failed."
-        end
-
-      end
-
-      hydra = Typhoeus::Hydra.new
-
-      hydra.cache_setter do |request|
-        if(request.cache_timeout && cacheable?(request, options))
-          @cache.set(request.cache_key, request.response, request.cache_timeout)
-        end
-      end
-
-      hydra.cache_getter do |request|
-        @cache.get(request.cache_key) rescue nil
-      end
-
-      hydra.queue(request)
-      hydra.run
-
+      
       ret
     end
-
+    
     def cacheable?(response, options)
       !options[:only_cache_200s] ||
           (options[:only_cache_200s] && response.code >= 200 && response.code < 300)
