@@ -62,7 +62,7 @@ end
 namespace :db do
 
   task :environment do
-    DATABASE_ENV = ENV['SINATRA_ENV'] || 'development'
+    DATABASE_ENV = ENV['SINATRA_ENV'] || ENV['RACK_ENV'] || 'development'
     MIGRATIONS_DIR = 'db/migrate'
   end
 
@@ -127,7 +127,7 @@ end
 # with the adaptor.  It is dropped by removing the created file below.
 desc 'Prepare to run spec tests.'
 task :prepare_test do
-  ENV['SINATRA_ENV'] = 'test' 
+  ENV['SINATRA_ENV'] = ENV['RACK_ENV'] = 'test' 
   Rake::Task['db:drop'].invoke
   Rake::Task['db:create'].invoke
   Rake::Task['db:migrate'].invoke
