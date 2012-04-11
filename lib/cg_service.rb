@@ -80,7 +80,7 @@ module CgService
       cset :version, '1'
 
       cset :lease_time_in_sec, 240
-      cset :lease_expiry_interval_in_sec: 5
+      cset :lease_expiry_interval_in_sec:, 5
 
       cset :scheme, 'http'
       cset :host, Socket.gethostname
