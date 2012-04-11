@@ -1,7 +1,7 @@
 source 'http://rubygems.org'
 source 'http://build.commongroundpublishing.com/gems'
 
-gem 'cg_service', '~> 0.7.4'
+gem 'cg_service', '~> 0.7.5'
 # gem 'cg_service', :path => '../cg_service'
 
 if RUBY_PLATFORM =~ /java/
