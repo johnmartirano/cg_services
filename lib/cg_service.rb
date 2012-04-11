@@ -79,6 +79,9 @@ module CgService
       cset :description, proc { "#{settings.name} Service" }
       cset :version, '1'
 
+      cset :lease_time_in_sec, 240
+      cset :lease_expiry_interval_in_sec: 5
+
       cset :scheme, 'http'
       cset :host, Socket.gethostname
       cset :port, '5000'
@@ -151,7 +154,8 @@ module CgService
   # config/service.yml).
   def configure_service
     file = File.join(settings.root, settings.service_config)
-    YAML.load_file(file)[settings.environment.to_s].each do |key, value|
+    conf = YAML.load_file(file)[settings.environment.to_s]
+    conf && conf.each do |key, value|
       set(key, value)
     end
   end
