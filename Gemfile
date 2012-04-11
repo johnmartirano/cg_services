@@ -1,7 +1,7 @@
 source 'http://rubygems.org'
 source 'http://build.commongroundpublishing.com/gems'
 
-gem 'cg_service', '0.7.0'
+gem 'cg_service', '~> 0.7.4'
 # gem 'cg_service', :path => '../cg_service'
 
 if RUBY_PLATFORM =~ /java/
@@ -15,7 +15,6 @@ group :development, :test do
     gem 'sqlite3'
   end
   gem 'cg_tasks', '~> 1.1.3'
-  gem 'warbler', '1.3.2' if RUBY_PLATFORM =~ /java/
 end
 
 group :test do
@@ -25,7 +24,6 @@ group :test do
     gem 'ruby-debug19'
     gem 'ruby-debug-ide'
   end
-  gem 'factory_girl'
 end
 
 group :deployment do
