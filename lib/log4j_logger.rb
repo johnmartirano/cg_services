@@ -1,3 +1,5 @@
+require 'logger'
+
 class Log4jLogger
   require 'log4j-1.2.15.jar'
   L4JLevel = org.apache.log4j.Level
@@ -22,11 +24,27 @@ class Log4jLogger
     org.apache.log4j.PropertyConfigurator.configure(config_file)
     @logger = org.apache.log4j.Logger.getRootLogger  #Can be any specific logger pathname
     @root = org.apache.log4j.Logger.getRootLogger
+    @formatter = Logger::Formatter.new
   end
 
   def add(severity, message = nil, progname = nil, &block)
-    message = (message || (block && block.call) || progname).to_s
-    @logger.log(SEVERETIES[severity], message)
+    obj = if message.nil?
+            if block_given?
+              yield
+            else
+              progname
+            end
+          else
+            message
+          end
+    
+    # abuse Logger::Formatter's private msg2str which formats
+    # non-Strings with :inspect and Exceptions by printing whole stack
+    # trace.
+    str = @formatter.send(:msg2str, obj)
+
+    str = "#{progname}: #{str}" if (progname && !message.nil?)
+    @logger.log(SEVERETIES[severity], str)
   end
 
   def level
@@ -45,10 +63,10 @@ class Log4jLogger
   #Lifted from BufferedLogger
   for severity in SEVERETIES.keys
     class_eval <<-EOT, __FILE__, __LINE__
-      def #{severity.downcase}(message = nil, progname = nil, &block)  # def debug(message = nil, progname = nil, &block)
-        add(#{severity}, message, progname, &block)                    #   add(DEBUG, message, progname, &block)
-      end                                                              # end
-                                                                       #
+      def #{severity.downcase}(progname = nil, &block)
+        add(#{severity}, nil, progname, &block)
+      end
+
       def #{severity.downcase}?                                        # def debug?
         enabled_for?(#{severity})                                           #   DEBUG >= @level
       end                                                              # end
