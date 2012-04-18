@@ -12,15 +12,8 @@ Gem::Specification.new do |s|
   s.summary     = ""
 
   s.add_dependency 'activerecord', '~> 3.0.6'
-  if RUBY_PLATFORM =~ /java/
-    s.add_dependency 'activerecord-jdbc-adapter', '1.2.1'
-    s.add_dependency 'activerecord-jdbcpostgresql-adapter'
-    s.add_dependency 'jdbc-postgres'
-    s.add_dependency 'jruby-openssl'
-  else
-    s.add_dependency 'pg'
-    s.add_dependency 'thin', '1.2.8'
-  end
+  s.add_dependency 'pg'
+  s.add_dependency 'thin', '1.2.8'
   s.add_dependency 'sinatra', '>= 1.2.1'
   s.add_dependency 'sinatra-reloader'
   s.add_dependency 'json', '>=1.4.6'
@@ -30,4 +23,23 @@ Gem::Specification.new do |s|
   s.files        = Dir.glob("{lib,spec,templates_custom}/**/*")
 
   s.require_paths = ['lib']
+
+  def s.remove_dependencies(*names)
+    dependencies.delete_if do |d|
+      names.include? d.name
+    end
+  end
+
+  # Set platform to java and add java-specific dependencies.
+  #
+  # @return [Gem::Specification] self
+  def s.java!
+    self.platform = 'java'
+    add_dependency 'activerecord-jdbc-adapter', '1.2.1'
+    add_dependency 'activerecord-jdbcpostgresql-adapter'
+    add_dependency 'jdbc-postgres'
+    add_dependency 'jruby-openssl'
+    remove_dependencies 'pg', 'thin'
+    self
+  end
 end
