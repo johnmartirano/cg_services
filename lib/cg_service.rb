@@ -25,7 +25,7 @@ module CgService
     end
   end
 
-  include CgService::Helper
+  include CgService::Hostname
 
   def self.extended(app)
     app.send(:include, CgService::AutoDoc)
