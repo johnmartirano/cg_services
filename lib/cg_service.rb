@@ -1,6 +1,7 @@
 require 'active_record'
 require 'active_record/disable_connection_pool'
 require 'cg_service/auto_doc'
+require 'cg_service/helper'
 require 'optparse'
 require 'sinatra/base'
 require 'socket'
@@ -23,6 +24,8 @@ module CgService
       end
     end
   end
+
+  include CgService::Helper
 
   def self.extended(app)
     app.send(:include, CgService::AutoDoc)
@@ -83,7 +86,7 @@ module CgService
       cset :lease_expiry_interval_in_sec, 5
 
       cset :scheme, 'http'
-      cset :host, Socket.gethostname
+      cset :host, hostname
       cset :port, '5000'
       cset :context_root, '/'
 
