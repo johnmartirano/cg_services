@@ -79,7 +79,7 @@ module CgLookupService
     # get all entries as html
     get '/v1/entries/?', :provides => 'html' do
       @title = 'CG Lookup Service Entries'
-      @entries = Entry.all
+      @entries = Entry.order(:type_name, :uri)
       erb :v1_entries
     end
 
