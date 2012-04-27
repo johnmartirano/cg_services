@@ -8,10 +8,37 @@ require 'socket'
 require 'yaml'
 require 'zlib'
 
-unless RUBY_PLATFORM =~/java/
-  require 'ruby-debug'
-end
-
+# Common operations for CG services.  Most of these are Sinatra apps,
+# so this module makes some assumptions about that.  Typically, a
+# Sinatra app should do this:
+#
+#    class App < Sinatra::Base
+#      configure do
+#        set :root => File.dirname(__FILE__)
+#        set :app_file => __FILE__
+#      end
+#
+#      extend CgService
+#      ...
+#    end
+#
+# Sinatra apps provide a 'settings' method.  Others must implement
+# similar.  Other apps should "include" this module rather than
+# "extend".  The configure! method is invoked when a class extends
+# this module, and configure! contains more Sinatra-specific stuff.
+#
+# (As already implemented by Sinatra), this module assumes the
+# following methods:
+#
+# settings - values set with set('key', value) may be accessed at
+# settings.key. If the value is a Proc, the value is the result of
+# invoking :call.
+#
+# set(key, value) - set a configuration value in the settings object
+# set(hash) - set multiple configuration values in the settings object
+#
+# disable(key) - equivalent to set(key, false)
+# enable(key) - equivalent to set(key, true)
 module CgService
 
   module RakeLoader
@@ -68,54 +95,65 @@ module CgService
     set(key, value) if self[key].nil?
   end
 
+  def apply_defaults
+    # defaults, if not already defined in the app
+    cset :environment, ENV['RACK_ENV'] || 'development'
+
+    cset :service_config, 'config/service.yml'
+    cset :database_config, 'config/database.yml'
+    cset :logger_config, 'config/log4j.properties'
+
+    cset :lookup_service_uri, 'http://localhost:5000/'
+    cset :lookup_service_version, '1'
+
+    cset :name, 'Unknown'
+    cset :description, proc { "#{settings.name} Service" }
+    cset :version, '1'
+
+    cset :lease_time_in_sec, 240
+    cset :lease_expiry_interval_in_sec, 5
+
+    cset :scheme, 'http'
+    cset :host, hostname
+    cset :port, '5000'
+    cset :context_root, '/'
+
+    cset :uri, proc {
+      scheme = settings.scheme
+      host = settings.host
+      port = settings.port
+
+      # normalize to <no-leading-slash><context><trailing-slash>
+      context_root = String.new(settings.context_root)
+      context_root += '/' unless context_root.end_with?('/')
+      context_root.slice!(0, 1) if context_root.start_with?('/')
+
+      "#{scheme}://#{host}:#{port}/#{context_root}"
+    }
+  end
+
+  # args are parsed twice since they 1) may set environment which
+  # affects service config, and 2) may set port which should
+  # override service config.
+  def apply_args_and_service_yml
+    parse_args!(ARGV.dup) if settings.app_file == $0
+    configure_service
+    parse_args!(ARGV) if settings.app_file == $0
+
+    # ignore any context root if run directly
+    if settings.app_file == $0
+      set :context_root, '/'
+    else
+      disable :run            # disable built-in webserver
+    end
+  end
+
+  # Called automatically when this module is extended.  Calls other
+  # methods to configure a Sinatra app.
   def configure!
     configure do
-      # defaults, if not already defined in the app
-      cset :service_config, 'config/service.yml'
-      cset :database_config, 'config/database.yml'
-      cset :logger_config, 'config/log4j.properties'
-
-      cset :lookup_service_uri, 'http://localhost:5000/'
-      cset :lookup_service_version, '1'
-
-      cset :name, 'Unknown'
-      cset :description, proc { "#{settings.name} Service" }
-      cset :version, '1'
-
-      cset :lease_time_in_sec, 240
-      cset :lease_expiry_interval_in_sec, 5
-
-      cset :scheme, 'http'
-      cset :host, hostname
-      cset :port, '5000'
-      cset :context_root, '/'
-
-      cset :uri, proc {
-        scheme = settings.scheme
-        host = settings.host
-        port = settings.port
-
-        # normalize to <no-leading-slash><context><trailing-slash>
-        context_root = String.new(settings.context_root)
-        context_root += '/' unless context_root.end_with?('/')
-        context_root.slice!(0, 1) if context_root.start_with?('/')
-
-        "#{scheme}://#{host}:#{port}/#{context_root}"
-      }
-
-      # args are parsed twice since they 1) may set environment which
-      # affects service config, and 2) may set port which should
-      # override service config.
-      parse_args!(ARGV.dup) if settings.app_file == $0
-      configure_service
-      parse_args!(ARGV) if settings.app_file == $0
-
-      # ignore any context root if run directly
-      if settings.app_file == $0
-        set :context_root, '/'
-      else
-        disable :run            # disable built-in webserver
-      end
+      apply_defaults
+      apply_args_and_service_yml
 
       configure_database
       configure_logger
@@ -147,8 +185,11 @@ module CgService
       opts.on('-p', '--port PORT', 'Set port of built-in webserver') do |p|
         set :port, p
       end
-      opts.on('-e', '--environment ENV', 'Set the environment') do |e|
+      opts.on('-e', '-E', '--environment ENV', 'Set the environment') do |e|
         set :environment, e
+      end
+      opts.on('-s', 'Deprecated') do |_s|
+        puts '-s commandline option is deprecated and has no effect'
       end
     end.parse!(args)
   end
@@ -187,8 +228,16 @@ module CgService
   end
 
   # Initialize a thread that will register with a lookup service according to
-  # +config+, which may be a
-  # Hash or a string filename that will be loaded using YAML.load_file
+  #
+  # (describe lookup service)
+  # settings.lookup_service_uri
+  # settings.lookup_service_version
+  #
+  # (describe this service)
+  # settings.name
+  # settings.description
+  # settings.uri
+  # settings.version
   def init_registration_thread
 
     # Important to not require 'cg_lookup_client' until we're ready to
@@ -225,7 +274,7 @@ module CgService
       end
     end
 
-    puts "|| CG #{name} Service is starting up on #{uri} ..."
+    puts "|| CG #{settings.name} Service is starting up on #{settings.uri} ..."
   end
 
 end

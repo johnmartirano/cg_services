@@ -25,8 +25,9 @@ module Rack
         reopen.call($stdout, options[:stdout_path])
         reopen.call($stderr, options[:stderr_path])
 
-        config = options[:service_config] || 'config/server.yml'
-        ::CgService.start_registration_thread(options[:Host], options[:Port], config)
+        if app.respond_to? :init_registration_thread
+          app.init_registration_thread
+        end
 
         server ||= Rack::Handler.get(options[:transfer]) || Rack::Handler.default(options)
         server.run(app, options)
@@ -37,7 +38,6 @@ module Rack
           "Host=HOST" => "Hostname to listen on (default: localhost)",
           "Port=PORT" => "Port to listen on (default: 8080)",
           "transfer=SERVER" => "Server to transfer to after starting registration thread",
-          "service_config=FILE" => "Absolute path to service.yml file",
           "stdout_path=FILE" => "Absolute path where stdout will be redirected",
           "stderr_path=FILE" => "Absolute path where stdout will be redirected",
         }
