@@ -57,14 +57,19 @@ module CgLookupService
       Thread.new do
         loop do
           sleep settings.lease_expiry_interval_in_sec
-          settings.db_lock.synchronize do
-            entries = Entry.all
-            entries.each do |entry|
-              seconds_since_update = Time.now.to_i - entry.updated_at.to_i
-              if seconds_since_update > settings.lease_time_in_sec
-                entry.delete
+          begin
+            settings.db_lock.synchronize do
+              entries = Entry.all
+              entries.each do |entry|
+                seconds_since_update = Time.now.to_i - entry.updated_at.to_i
+                if seconds_since_update > settings.lease_time_in_sec
+                  entry.delete
+                end
               end
             end
+          ensure
+            # release this thread's connection back to the pool 
+            ActiveRecord::Base.clear_active_connections!
           end
         end
       end
