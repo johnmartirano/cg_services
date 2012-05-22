@@ -11,7 +11,8 @@ Gem::Specification.new do |s|
   s.description = "Shared library code for CG services."
   s.summary     = ""
 
-  s.add_dependency 'activerecord', '~> 3.0.6'
+  s.add_dependency 'activerecord', '= 3.0.12'
+  s.add_dependency 'activerecord_threadsafe_fix', '= 3.0.12.1'
   s.add_dependency 'pg'
   s.add_dependency 'thin', '1.2.8'
   s.add_dependency 'sinatra', '>= 1.2.1'

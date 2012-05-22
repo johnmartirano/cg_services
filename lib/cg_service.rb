@@ -1,5 +1,5 @@
 require 'active_record'
-require 'active_record/disable_connection_pool'
+require 'activerecord_threadsafe_fix'
 require 'cg_service/auto_doc'
 require 'cg_service/helper'
 require 'optparse'
