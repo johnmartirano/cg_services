@@ -46,7 +46,7 @@ module CgLookupService
 
     # Configure expiration thread
     configure do
-      set :db_lock, Mutex.new
+      set :db_lock, Mutex.new   # FIXME: mutex unnecessary because db txns
 
       puts "|| CG Lookup Service is starting up..."
       puts "|| Lease time set to " + \
@@ -57,7 +57,7 @@ module CgLookupService
       Thread.new do
         loop do
           sleep settings.lease_expiry_interval_in_sec
-          begin
+          ActiveRecord::Base.connection_pool.with_connection do
             settings.db_lock.synchronize do
               entries = Entry.all
               entries.each do |entry|
@@ -67,9 +67,6 @@ module CgLookupService
                 end
               end
             end
-          ensure
-            # release this thread's connection back to the pool 
-            ActiveRecord::Base.clear_active_connections!
           end
         end
       end
