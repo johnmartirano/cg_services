@@ -328,9 +328,9 @@ module CgRoleClient
                          :headers => {"Accept" => "application/json", "Content-Type" => "application/json; charset=utf-8"},
                          :timeout => REQUEST_TIMEOUT}
 
-		  puts ">>>>>>> remove_role"
-		  puts ">>>>>>>>> request_url: #{request_url}"
-		  puts ">>>>>>>>> request_options: #{request_options.inspect}"
+		  logger.error ">>>>>>> remove_role"
+		  logger.error ">>>>>>>>> request_url: #{request_url}"
+		  logger.error ">>>>>>>>> request_options: #{request_options.inspect}"
 
       run_request(request_url, request_options) do |response|
         response.body
