@@ -331,7 +331,6 @@ module CgRoleClient
 		  Rails.logger.error ">>>>>>> remove_role"
 		  Rails.logger.error ">>>>>>>>> request_url: #{request_url}"
 		  Rails.logger.error ">>>>>>>>> request_options: #{request_options.inspect}"
-		  raise "Yo! An Error Occurred"
 
       run_request(request_url, request_options) do |response|
         response.body
