@@ -85,7 +85,8 @@ module CgRoleClient
         block.call(*args)
       rescue Exception => e
         puts e
-        raise
+        puts e.backtrace.join("\n")
+        raise e
       end
     end
 
