@@ -328,9 +328,10 @@ module CgRoleClient
                          :headers => {"Accept" => "application/json", "Content-Type" => "application/json; charset=utf-8"},
                          :timeout => REQUEST_TIMEOUT}
 
-		  logger.error ">>>>>>> remove_role"
-		  logger.error ">>>>>>>>> request_url: #{request_url}"
-		  logger.error ">>>>>>>>> request_options: #{request_options.inspect}"
+		  Rails.logger.error ">>>>>>> remove_role"
+		  Rails.logger.error ">>>>>>>>> request_url: #{request_url}"
+		  Rails.logger.error ">>>>>>>>> request_options: #{request_options.inspect}"
+		  raise "Yo! An Error Occurred"
 
       run_request(request_url, request_options) do |response|
         response.body
