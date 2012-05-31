@@ -14,8 +14,7 @@ group :development, :test do
     gem 'tux'
     gem 'sqlite3'
   end
-  gem 'cg_tasks', '~> 1.1.3'
-  gem 'jruby-rack', '>= 1.1.5'
+  gem 'cg_tasks', '~> 1.1.10'
 end
 
 group :test do
