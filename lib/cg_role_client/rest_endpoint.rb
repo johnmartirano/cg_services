@@ -143,8 +143,8 @@ module CgRoleClient
       request_url = uri_with_version + "actors/"
       request_options = {:method => :get,
                          :headers => {"Accept" => "application/json"},
-                         :params  => {:actor_type => actor_type, :actor_id => actor_id},
-}
+                         :cache_timeout => SECONDS_IN_A_DAY,
+                         :params  => {:actor_type => actor_type, :actor_id => actor_id}}
 
       run_request(request_url, request_options) do |response|
         CgRoleClient::Actor.new.from_json(response.body)
@@ -157,7 +157,8 @@ module CgRoleClient
       request_options = {:method => :get,
                          :headers => {"Accept" => "application/json"},
                          :params  => {:target_type => target_type},
-                         :timeout => REQUEST_TIMEOUT}
+                         :timeout => REQUEST_TIMEOUT,
+                         :cache_timeout => SECONDS_IN_A_DAY}
 
       run_request(request_url, request_options) do |response|
         CgRoleClient::RoleType.new.from_json(response.body)
@@ -182,7 +183,8 @@ module CgRoleClient
 
       request_options = {:method => :get,
                          :headers => {"Accept" => "application/json"},
-                         :timeout => REQUEST_TIMEOUT}
+                         :timeout => REQUEST_TIMEOUT,
+                         :cache_timeout => SECONDS_IN_A_DAY}
 
       begin
         run_request(request_url, request_options) do |response|
