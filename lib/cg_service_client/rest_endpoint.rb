@@ -38,19 +38,24 @@ module CgServiceClient
       run_rest_client_request(request_url, request_options, options, &block)
     end
 
-    def rest_client_cache_key(url)
-      Digest::SHA1.hexdigest(url)
+    def rest_client_cache_key(url, params = nil)
+      if params
+        Digest::SHA1.hexdigest(url + params.to_s)
+      else
+        Digest::SHA1.hexdigest(url)
+      end
     end
 
     def run_rest_client_request(request_url, request_options = {}, options = {}, &block)
       options = {:only_cache_200s => true}.merge(options)
       
       if request_options[:method] == :get
-        response = @cache.get(rest_client_cache_key(request_url)) rescue nil
+        response = @cache.get(rest_client_cache_key(request_url, request_options[:params])) rescue nil
       end
 
       request_options[:timeout] ||= REQUEST_TIMEOUT
       timeout = (request_options[:timeout] / 1000)
+      params = request_options[:params]
       request_options[:headers].merge!({:params => request_options.delete(:params)}) if request_options[:params]
       request = RestClient::Request.new({:url => request_url,
                                          :method => request_options[:method],
@@ -69,7 +74,7 @@ module CgServiceClient
       ret = nil
       if (response.code >= 200 && response.code < 300)
         if (request_options[:method] == :get && request_options[:cache_timeout] && cacheable?(response, options))
-          @cache.set(rest_client_cache_key(request_url), response, request_options[:cache_timeout])
+          @cache.set(rest_client_cache_key(request_url, params), response, request_options[:cache_timeout])
         end
         ret = yield response
       elsif response.code >= 400 && response.code < 500
