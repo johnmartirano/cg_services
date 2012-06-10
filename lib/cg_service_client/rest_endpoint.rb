@@ -57,6 +57,7 @@ module CgServiceClient
         begin
           request_options[:timeout] ||= REQUEST_TIMEOUT
           timeout = (request_options[:timeout] / 1000)
+          params = request_options[:params]
           request_options[:headers].merge!({:params => request_options.delete(:params)}) if request_options[:params]
           request = RestClient::Request.new({:url => request_url,
                                              :method => request_options[:method],
@@ -64,6 +65,9 @@ module CgServiceClient
                                              :payload => request_options[:body],
                                              :timeout => timeout})
           response = request.execute
+          if (response.code >= 200 && response.code < 300 && request_options[:method] == :get && request_options[:cache_timeout] && cacheable?(response, options))
+            @cache.set(rest_client_cache_key(request_url, params), response, request_options[:cache_timeout])
+          end
         rescue RestClient::RequestTimeout => e
           raise CgServiceClient::Exceptions::TimeoutError.new(nil, nil), "Request for #{request_url} timed out."
         end
@@ -71,9 +75,6 @@ module CgServiceClient
 
       ret = nil
       if (response.code >= 200 && response.code < 300)
-        if (request_options[:method] == :get && request_options[:cache_timeout] && cacheable?(response, options))
-          @cache.set(rest_client_cache_key(request_url, params), response, request_options[:cache_timeout])
-        end
         ret = yield response
       elsif response.code >= 400 && response.code < 500
         raise CgServiceClient::Exceptions::ClientError.new(response.code, response.description), "Client error #{response.code}: #{response.body}."
