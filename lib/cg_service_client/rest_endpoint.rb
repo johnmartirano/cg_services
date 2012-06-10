@@ -53,18 +53,16 @@ module CgServiceClient
         response = @cache.get(rest_client_cache_key(request_url, request_options[:params])) rescue nil
       end
 
-      request_options[:timeout] ||= REQUEST_TIMEOUT
-      timeout = (request_options[:timeout] / 1000)
-      params = request_options[:params]
-      request_options[:headers].merge!({:params => request_options.delete(:params)}) if request_options[:params]
-      request = RestClient::Request.new({:url => request_url,
-                                         :method => request_options[:method],
-                                         :headers => request_options[:headers],
-                                         :payload => request_options[:body],
-                                         :timeout => timeout})
-
       if response.nil?
         begin
+          request_options[:timeout] ||= REQUEST_TIMEOUT
+          timeout = (request_options[:timeout] / 1000)
+          request_options[:headers].merge!({:params => request_options.delete(:params)}) if request_options[:params]
+          request = RestClient::Request.new({:url => request_url,
+                                             :method => request_options[:method],
+                                             :headers => request_options[:headers],
+                                             :payload => request_options[:body],
+                                             :timeout => timeout})
           response = request.execute
         rescue RestClient::RequestTimeout => e
           raise CgServiceClient::Exceptions::TimeoutError.new(nil, nil), "Request for #{request_url} timed out."
