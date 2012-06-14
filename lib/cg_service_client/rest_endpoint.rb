@@ -50,7 +50,16 @@ module CgServiceClient
       options = {:only_cache_200s => true}.merge(options)
       
       if request_options[:method] == :get
-        response = @cache.get(rest_client_cache_key(request_url, request_options[:params])) rescue nil
+        response = begin
+                     @cache.get(rest_client_cache_key(request_url, request_options[:params]))
+                   rescue => e
+                     # FIXME: this rescue should not be necessary...
+                     # Better would be to use a logger to log a
+                     # message perhaps?  This is here just as a last
+                     # resort.
+                     puts "ERROR: #{e} cache lookup failed for #{request_url}, #{request_options[:params]}"
+                     nil
+                   end
       end
 
       if response.nil?

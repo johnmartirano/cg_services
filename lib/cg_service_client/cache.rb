@@ -20,7 +20,9 @@ module CgServiceClient
 
     def get(key)
       Cache.entries_monitor.synchronize do
-        Cache.entries.fetch(key, nil).value
+        if resp = Cache.entries.fetch(key, nil)
+          resp.value
+        end
       end
     end
 
