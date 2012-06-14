@@ -27,6 +27,12 @@ module CgRoleClient
       # Enables activities to be found using statements
       # such as, Activity.read, Activity.write, etc.
       def method_missing(sym, *args, &block)
+        puts "CgRoleClient::Activity.activity is deprecated, use CgRoleClient::Activity[activity]"
+        puts "Called by #{caller()}"
+        self[sym]
+      end
+
+      def [](sym)
         begin
           # TODO: Should there be a more general-use cache for caching
           # parsed JSON (rather than simply caching the unparsed
