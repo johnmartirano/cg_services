@@ -28,7 +28,7 @@ module CgRoleClient
       # such as, Activity.read, Activity.write, etc.
       def method_missing(sym, *args, &block)
         puts "CgRoleClient::Activity.activity is deprecated, use CgRoleClient::Activity[:activity]"
-        puts "Called by #{caller()}"
+        puts "Called by #{caller.first}"
         self[sym]
       end
 
