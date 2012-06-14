@@ -27,7 +27,7 @@ module CgRoleClient
       # Enables activities to be found using statements
       # such as, Activity.read, Activity.write, etc.
       def method_missing(sym, *args, &block)
-        puts "CgRoleClient::Activity.activity is deprecated, use CgRoleClient::Activity[activity]"
+        puts "CgRoleClient::Activity.activity is deprecated, use CgRoleClient::Activity[:activity]"
         puts "Called by #{caller()}"
         self[sym]
       end

@@ -82,7 +82,7 @@ def main
   puts "Target " + target.class.to_s + " " + target.id.to_s + " created."
 
   puts "\nGranting a reviewer role to group " + group.id.to_s + " for target " + target.class.to_s + " " + target.id.to_s + "..."
-  role_type = CgRoleClient::RoleType.reviewer("CgDocument::Work")
+  role_type = CgRoleClient::RoleType.find(:reviewer, "CgDocument::Work")
   role = CgRoleClient::Role.grant(role_type,group,target)
   puts "Granted role ID is " + role.id.to_s
 
@@ -90,10 +90,10 @@ def main
   aggregate_role = CgRoleClient::Role.aggregate_role(group,target)
   puts "Aggregate role contains " + aggregate_role.roles.size.to_s + " roles"
   puts "Testing if the role allows for read activity..."
-  puts aggregate_role.allows?(CgRoleClient::Activity.read)
+  puts aggregate_role.allows?(CgRoleClient::Activity[:read])
 
   puts "\nGranting a reviewer role to actor " + actor.id.to_s + " for target " + target.class.to_s + " " + target.id.to_s + "..."
-  role_type = CgRoleClient::RoleType.reviewer("CgDocument::Work")
+  role_type = CgRoleClient::RoleType.find(:reviewer, "CgDocument::Work")
   role = CgRoleClient::Role.grant(role_type,actor,target)
   puts "Granted role ID is " + role.id.to_s
 
@@ -109,7 +109,7 @@ def main
   aggregate_role = CgRoleClient::Role.aggregate_role(actor,target)
   puts "Aggregate role contains " + aggregate_role.roles.size.to_s + " roles"
   puts "Testing if the role allows for read activity..."
-  puts aggregate_role.allows?(CgRoleClient::Activity.read)
+  puts aggregate_role.allows?(CgRoleClient::Activity[:read])
 
   puts "\nRevoking the Reviewer role for actor " + actor.id.to_s + "..."
   aggregate_role = CgRoleClient::Role.aggregate_role(actor,target)
