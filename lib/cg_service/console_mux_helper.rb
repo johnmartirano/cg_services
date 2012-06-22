@@ -13,7 +13,7 @@ module CgService
   module ConsoleMuxHelper
     include CgService::Helper
 
-    def run_service(opts)
+    def run_serviceOLD(opts)
       unless opts[:name]
         raise ArgumentError, 'please specify :name'
       end
@@ -30,6 +30,28 @@ module CgService
 
       config = service_config(opts[:chdir])
       run("rackup -p #{config[env]['port']}", opts)
+    end
+
+    def run_service(opts)
+      unless opts[:name]
+        raise ArgumentError, 'please specify :name'
+      end
+
+      command = 'rackup'
+      unless opts[:chdir]
+        opts[:chdir] = "services/cg_#{opts[:name]}_service"
+      end
+      config = service_config(opts[:chdir])
+
+      run(command,opts) do |command, opts|
+        env = if opts[:env] && opts[:env]['RACK_ENV']
+              opts[:env]['RACK_ENV']
+            else
+              'development'
+            end
+        command = command + " -p #{config[env]['port']}"
+        [command, opts]
+      end
     end
   end
 end

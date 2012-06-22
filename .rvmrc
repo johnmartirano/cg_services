@@ -1,2 +1,2 @@
 rvm 1.9.2
-rvm gemset use cg_service
+#rvm gemset use cg_service

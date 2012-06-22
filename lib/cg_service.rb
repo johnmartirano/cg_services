@@ -8,6 +8,7 @@ require 'socket'
 require 'yaml'
 require 'zlib'
 
+
 # Common operations for CG services.  Most of these are Sinatra apps,
 # so this module makes some assumptions about that.  Typically, a
 # Sinatra app should do this:
@@ -115,6 +116,7 @@ module CgService
 
     cset :scheme, 'http'
     cset :host, hostname
+    # default port for sinatra is 4567
     cset :port, '5000'
     cset :context_root, '/'
 
@@ -273,7 +275,6 @@ module CgService
         puts "TODO: An admin should be notified at this point."
       end
     end
-
     puts "|| CG #{settings.name} Service is starting up on #{settings.uri} ..."
   end
 
