@@ -53,6 +53,12 @@ module CgService
     end
   end
 
+  class MonitoredApp < Sinatra::Base
+    get '/v1/ping/?', :provides => 'html' do
+      'Success'
+    end
+  end
+
   include CgService::Hostname
 
   def self.extended(app)
