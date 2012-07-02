@@ -36,7 +36,7 @@ end
 Time.send :include, PrettyDate
 
 module CgLookupService
-  class App < Sinatra::Base
+  class App < CgService::MonitoredApp
     configure do
       set :root => File.dirname(__FILE__)
       set :app_file => __FILE__
@@ -149,6 +149,7 @@ module CgLookupService
         end
       end
     end
+
 
     # start the server if ruby file executed directly
     run! if app_file == $0
