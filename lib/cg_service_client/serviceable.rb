@@ -23,37 +23,11 @@ module CgServiceClient
       @endpoint_class = endpoint_class
     end
 
-    def find_service_endpoint
-=begin
-      result = CgLookupClient::Entry.lookup(@service_name, @service_version)
-      if result.nil? || result[:entry].nil?
-        raise ServiceUnavailableError, "No #{@service_name} services are available."
-      else
-        eval(@endpoint_class).new(result[:entry].uri, @service_version)
-      end
-=end
-      results = CgLookupClient::Entry.lookup(@service_name, @service_version)
-      if results.nil? || result.compact.blank?
-        raise ServiceUnavailableError, "No #{@service_name} services are available."
-      end
-      to_ping = results.compact.map do |result|
-        eval(@endpoint_class).new(result[:entry].uri, @service_version)
-      end
-      to_ping.select {|endpoint| endpoint.ping }.first #async pings required?
-    end
-
+    # CgServiceClient::RestEndpoint manages the relationship with lookup client,
+    # and maintains a pool of endpoints for all the services on all the node agents
+    # this way when any class notices a bad endpoint it can be refreshed for all classes
     def ensure_endpoint
-      if @endpoint == nil # || @endpoint.ping failed
-        @endpoint = find_service_endpoint
-      end
-    end
-
-      # This thread periodically refreshes the endpoint
-    Thread.new do
-      loop do
-        sleep ENDPOINT_FLUSH_INTERVAL_IN_SEC
-        @endpoint = find_service_endpoint
-      end
+      @endpoint = CgServiceClient::RestEndpoint.get(@service_name, @service_version, @endpoint_class)
     end
 
     class ServiceUnavailableError < StandardError;

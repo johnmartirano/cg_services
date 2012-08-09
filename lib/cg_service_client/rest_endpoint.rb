@@ -1,11 +1,50 @@
+require 'cg_lookup_client'
+
 module CgServiceClient
+
+  class ServiceUnavailableError < StandardError;
+  end
+
   # Generic base class for interacting with RESTFul service endpoints.
   class RestEndpoint
+
+    class << self
+
+      def endpoints
+        @endpoints ||= Hash.new { |h,k| h[k] = {} }
+      end
+
+      #a random selection from last known good endpoints of the given type
+      def get(service_name, service_version, endpoint_class)
+        if endpoints[service_name][service_version].blank?
+          self.refresh(service_name, service_version, endpoint_class)
+        end
+        endpoints[service_name][service_version].choice
+      end
+      
+      #get the current good endpoints from lookup service
+      #could optimize by refreshing all endpoint types when we notice any type go down,
+      #since there is a uri per node/service and all the services on a node are likely down
+      def refresh(service_name, service_version, endpoint_class)
+        results = CgLookupClient::Entry.lookup(service_name, service_version)
+        if results.nil? || results.compact.blank?
+          raise ServiceUnavailableError, "No #{service_name} services are available."
+        end
+        to_ping = results.compact.map do |result|
+          endpoint_class.constantize.new(service_name, result[:entry].uri, service_version)
+        end
+
+        endpoints[service_name][service_version] = to_ping.select {|endpoint| !endpoint.ping.nil? }
+      end
+
+    end
+
     REQUEST_TIMEOUT = 10000 # milliseconds
 
-    attr_reader :uri, :version
+    attr_reader :name, :uri, :version
 
-    def initialize(uri, version)
+    def initialize(name, uri, version)
+      @name = name
       @uri = uri
         # ensure trailing slash on uri
       @uri << '/' if @uri[-1].chr != '/'
@@ -30,6 +69,20 @@ module CgServiceClient
 
     def hash
       uri_with_version.hash
+    end
+
+    def ping
+      self.run_request(uri_with_version + 'ping/?',
+                       {:method => :get,
+                        :headers => {"Accept" => "text/html"},
+                        :timeout => RestEndpoint::REQUEST_TIMEOUT}
+                      ) do |response|
+                        response && response.body == "Success"
+                      end
+    end
+
+    def refresh
+      CgServiceClient::RestEndpoint.refresh(@name, @version, self.class.to_s)
     end
 
     protected
@@ -62,6 +115,7 @@ module CgServiceClient
                    end
       end
 
+      refreshed_count = 0
       if response.nil?
         begin
           request_options[:timeout] ||= REQUEST_TIMEOUT
@@ -79,6 +133,16 @@ module CgServiceClient
           end
         rescue RestClient::RequestTimeout => e
           raise CgServiceClient::Exceptions::TimeoutError.new(nil, nil), "Request for #{request_url} timed out."
+        rescue Errno::ECONNREFUSED => e
+          refreshed_count += 1
+          refresh
+          #once logger is defined for the services
+          #logger.error "\n\n\n\n\n\n>>>>>>>>>> #{@name} service refused connection #{refreshed_count} time#{refreshed_count > 1 ? 's' : ''}"
+          #only retry an arbitrary number of times to protect against infinite loop.
+          retry if refreshed_count <= 2
+          #refresh raised an error if it could not produce a good endpoint,
+          #so should only get here if the next endpoint it found went down between the ping and our retried request
+          raise
         end
       end
 
