@@ -24,16 +24,26 @@ module CgServiceClient
     end
 
     def find_service_endpoint
+=begin
       result = CgLookupClient::Entry.lookup(@service_name, @service_version)
       if result.nil? || result[:entry].nil?
         raise ServiceUnavailableError, "No #{@service_name} services are available."
       else
         eval(@endpoint_class).new(result[:entry].uri, @service_version)
       end
+=end
+      results = CgLookupClient::Entry.lookup(@service_name, @service_version)
+      if results.nil? || result.compact.blank?
+        raise ServiceUnavailableError, "No #{@service_name} services are available."
+      end
+      to_ping = results.compact.map do |result|
+        eval(@endpoint_class).new(result[:entry].uri, @service_version)
+      end
+      to_ping.select {|endpoint| endpoint.ping }.first #async pings required?
     end
 
     def ensure_endpoint
-      if @endpoint == nil
+      if @endpoint == nil # || @endpoint.ping failed
         @endpoint = find_service_endpoint
       end
     end
