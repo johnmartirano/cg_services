@@ -185,23 +185,12 @@ module CgLookupClient
     end
 
     def self.lookup_from_all_endpoints(type, version)
-      match = nil
       @entries_monitor.synchronize do
-        @endpoints.each do |endpoint|
-          results = endpoint.lookup(type)
-          results.each do |result|
-            unless result[:entry].nil?
-              if result[:entry].version == version
-                # TODO ping service to make sure alive, if alive return. Also could compare response
-                # times and send the one with the shortest time.
-                match = result
-                break
-              end
-            end
-          end
-        end
+
+        @results = @endpoints.map {|ep| ep.lookup(type) }.flatten #async lookups required?
+        @matches = @results.select {|r| !r[:entry].nil? && r[:entry].version == version }
       end
-      match
+      @matches
     end
 
     def self.register_with_all_endpoints(entry)
