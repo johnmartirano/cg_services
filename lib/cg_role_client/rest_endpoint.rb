@@ -9,9 +9,10 @@ module CgRoleClient
     SECONDS_IN_A_YEAR = SECONDS_IN_A_DAY * 365
     REQUEST_TIMEOUT = CgServiceClient::RestEndpoint::REQUEST_TIMEOUT
     
-    def initialize(uri, version)
+    def initialize(name, uri, version)
       super
     end
+
 
     def find_all_role_types
       request_url = uri_with_version + "roles/types/"
