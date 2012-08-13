@@ -11,7 +11,9 @@ module CgServiceClient
     class << self
       #class instance vars to govern the refresh process
       def endpoints
-        @endpoints ||= Hash.new { |h,k| h[k] = {} }
+        @endpoints ||= Hash.new do |h,k|
+          h[k] = Hash.new {|h,k| h[k] = [] }
+        end
       end
 
       def refreshed_times

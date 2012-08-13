@@ -25,7 +25,12 @@ module CgServiceClient
     # and maintains a pool of endpoints for all the services on all the node agents
     # this way when any class notices a bad endpoint it can be refreshed for all classes
     def endpoint
-      CgServiceClient::RestEndpoint.get(@service_name, @service_version, @endpoint_class)
+      ep = CgServiceClient::RestEndpoint.get(@service_name, @service_version, @endpoint_class)
+      if ep.nil?
+        raise CgServiceClient::ServiceUnavailableError
+      else
+        ep
+      end
     end
 
   end
