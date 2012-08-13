@@ -23,8 +23,14 @@ module CgRoleClient
 
       around :all, :find, :find_by_role_name_and_target_type do |*args, &block|
         begin
-          ensure_endpoint
           block.call(*args)
+        rescue Errno::ECONNREFUSED => e
+          begin
+            block.call(*args)
+          rescue Exception => e
+            puts e
+            raise
+          end
         rescue Exception => e
           puts e
           raise
@@ -32,15 +38,15 @@ module CgRoleClient
       end
 
       def all
-        @endpoint.find_all_role_types
+        endpoint.find_all_role_types
       end
 
       def find(id)
-        @endpoint.find_role_type_by_id(id)
+        endpoint.find_role_type_by_id(id)
       end
 
       def find_by_role_name_and_target_type(role_name, target_type)
-        @endpoint.find_role_type_by_role_name_and_target_type(role_name, target_type)
+        endpoint.find_role_type_by_role_name_and_target_type(role_name, target_type)
       end
 
       def method_missing(sym, *args, &block)
@@ -61,7 +67,6 @@ module CgRoleClient
 
     def activities
       begin
-        RoleType.ensure_endpoint
         RoleType.endpoint.find_role_type_activities_by_role_type_id(@id)
       rescue Exception => e
         puts e

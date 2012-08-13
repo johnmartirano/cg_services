@@ -21,8 +21,14 @@ module CgRoleClient
 
       around :create, :find_by_code do | *args, &block |
         begin
-          ensure_endpoint
           block.call(*args)
+        rescue Errno::ECONNREFUSED => e
+          begin #try again after refreshing, once only
+            block.call(*args)
+          rescue Exception => e
+            puts e
+            raise
+          end
         rescue Exception => e
           puts e
           raise
@@ -34,11 +40,11 @@ module CgRoleClient
         if !group.valid? || !group.id.nil?
           return false
         end
-        @endpoint.create_group(group)
+        endpoint.create_group(group)
       end
 
       def find_by_code(group_code)
-        @endpoint.find_group_by_code(group_code)
+        endpoint.find_group_by_code(group_code)
       end
 
     end
@@ -49,8 +55,14 @@ module CgRoleClient
 
     around :add, :remove, :actors do | *args, &block |
       begin
-        Group.ensure_endpoint
         block.call(*args)
+      rescue Errno::ECONNREFUSED => e
+        begin #try again after refreshing, once only
+          block.call(*args)
+        rescue Exception => e
+          puts e
+          raise
+        end
       rescue Exception => e
         puts e
         raise
@@ -72,7 +84,7 @@ module CgRoleClient
     # Might be needed later
 =begin
     def roles
-      @endpoint.find_group_roles_by_group_id
+      Group.endpoint.find_group_roles_by_group_id
     end
 =end
 

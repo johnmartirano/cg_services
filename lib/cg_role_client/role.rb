@@ -22,8 +22,14 @@ module CgRoleClient
 
       around :grant, :aggregate_role do |*args, &block |
         begin
-          ensure_endpoint
           block.call(*args)
+        rescue Errno::ECONNREFUSED => e
+          begin #try again after refreshing, once only
+            block.call(*args)
+          rescue Exception => e
+            puts e
+            raise
+          end
         rescue Exception => e
           puts e
           raise
@@ -37,7 +43,7 @@ module CgRoleClient
         role = Role.new({:role_type_id => role_type.id,
                          :group_id => group.id,
                          :target_id => target.id})
-        @endpoint.create_role(role)
+        endpoint.create_role(role)
       end
 
         # Get the aggregate role for an actor or group on a target.
@@ -50,9 +56,9 @@ module CgRoleClient
         end
         begin
           if actor_or_group.kind_of? CgRoleClient::Actor
-            roles = @endpoint.find_actor_roles_on_target(actor_or_group.id, target[:class], target[:id])
+            roles = endpoint.find_actor_roles_on_target(actor_or_group.id, target[:class], target[:id])
           else
-            roles = @endpoint.find_group_roles_on_target(actor_or_group.id, target[:class], target[:id])
+            roles = endpoint.find_group_roles_on_target(actor_or_group.id, target[:class], target[:id])
           end
         rescue => e
           if e.kind_of?(CgServiceClient::Exceptions::ClientError) && e.http_code == 404
@@ -67,7 +73,7 @@ module CgRoleClient
       def group_for(actor_or_group)
         group = actor_or_group
         if actor_or_group.kind_of? CgRoleClient::Actor
-          group = @endpoint.find_singleton_group_by_actor_id(actor_or_group.id)
+          group = endpoint.find_singleton_group_by_actor_id(actor_or_group.id)
         end
         group
       end
@@ -81,8 +87,14 @@ module CgRoleClient
 
     around :revoke do |*args, &block |
       begin
-        Role.ensure_endpoint
         block.call(*args)
+      rescue Errno::ECONNREFUSED => e
+        begin #try again after refreshing, once only
+          block.call(*args)
+        rescue Exception => e
+          puts e
+          raise
+        end
       rescue Exception => e
         puts e
         puts e.backtrace.join("\n")

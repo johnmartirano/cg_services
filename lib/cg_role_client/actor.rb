@@ -23,8 +23,14 @@ module CgRoleClient
 
       around :create, :find_by_actor_type_and_actor_id, :find_with_roles_on_target, :find_by_target_with_activities do | *args, &block |
         begin
-          ensure_endpoint
           block.call(*args)
+        rescue Errno::ECONNREFUSED => e
+          begin #try again after refreshing, once only
+            block.call(*args)
+          rescue Exception => e
+            puts e
+            raise
+          end
         rescue Exception => e
           puts e
           raise
@@ -36,15 +42,15 @@ module CgRoleClient
         if !actor.valid? || !actor.id.nil?
           return false
         end
-        @endpoint.create_actor(actor)
+        endpoint.create_actor(actor)
       end
 
       def find_by_actor_type_and_actor_id(actor_type, actor_id)
-        @endpoint.find_actor_by_actor_type_and_actor_id(actor_type,actor_id)
+        endpoint.find_actor_by_actor_type_and_actor_id(actor_type,actor_id)
       end
 
       def find_with_roles_on_target(target_id, target_type)
-        @endpoint.find_with_roles_on_target(target_id, target_type)
+        endpoint.find_with_roles_on_target(target_id, target_type)
       end
 
       # Get all the actors with an activity on a target
@@ -57,7 +63,7 @@ module CgRoleClient
         target_id = target.id.to_s
         target_type = target.class.name
         activity_ids = activities.map &:id
-        @endpoint.find_actors_by_target_and_target_type_and_activities(target_id, target_type, activity_ids)
+        endpoint.find_actors_by_target_and_target_type_and_activities(target_id, target_type, activity_ids)
       end
     end
 
@@ -70,7 +76,6 @@ module CgRoleClient
     # with a group that only it is a member of.
     def singleton_group
       begin
-        Actor.ensure_endpoint
         Actor.endpoint.find_singleton_group_by_actor_id(@id)
       rescue Exception => e
         puts e

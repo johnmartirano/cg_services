@@ -19,11 +19,6 @@ module CgRoleClient
     uses_service("Role", "1", "CgRoleClient::RestEndpoint")
 
     class << self
-      def endpoint
-        ensure_endpoint
-        @endpoint
-      end
-
       # Enables activities to be found using statements
       # such as, Activity.read, Activity.write, etc.
       def method_missing(sym, *args, &block)
