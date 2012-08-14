@@ -20,9 +20,13 @@ module CgServiceClient
         @refreshed_times ||= Hash.new { |h,k| h[k] = {} }
       end
 
-      #a random selection from last known good endpoints of the given type
+      # a random selection from last known good endpoints of the given type
+      # refresh after two minutes or if there are no known good endpoints
       def get(service_name, service_version, endpoint_class)
-        if endpoints[service_name][service_version].blank?
+        if endpoints[service_name][service_version].blank? ||
+           (refreshed_times[service_name][service_version] &&
+           Time.now - refreshed_times[service_name][service_version] > 2.minutes)
+
           self.refresh(service_name, service_version, endpoint_class)
         end
         endpoints[service_name][service_version].choice
@@ -32,26 +36,33 @@ module CgServiceClient
       #could optimize by refreshing all endpoint types when we notice any type go down,
       #since there is a uri per node/service and all the services on a node are likely down
       def refresh(service_name, service_version, endpoint_class)
-        if !@refreshing && (  refreshed_times[service_name][service_version].nil? || (Time.now - refreshed_times[service_name][service_version]) > 5.seconds  )
+        if !@refreshing &&
+           (refreshed_times[service_name][service_version].nil? ||
+           Time.now - refreshed_times[service_name][service_version] > 5.seconds)
+
           do_refresh(service_name, service_version, endpoint_class)
         end
       end
 
+      # get the lookup table entries and ping them, store responsive ones
       def do_refresh(service_name, service_version, endpoint_class)
-        @refreshing = true
-        results = CgLookupClient::Entry.lookup(service_name, service_version)
-        if results.nil? || results.compact.blank?
-          raise ServiceUnavailableError, "No #{service_name} services are available."
-        end
-        to_ping = results.compact.map do |result|
-          endpoint_class.constantize.new(service_name, result[:entry].uri, service_version)
-        end
-        live_endpoints = to_ping.select {|endpoint| endpoint.ping }
-        if live_endpoints.blank?
-          raise ServiceUnavailableError, "No #{service_name} services are available."
-        else
-          endpoints[service_name][service_version] = live_endpoints
-          refreshed_times[service_name][service_version] = Time.now
+        begin
+          @refreshing = true
+          results = CgLookupClient::Entry.lookup(service_name, service_version)
+          if results.nil? || results.compact.blank?
+            raise ServiceUnavailableError, "No #{service_name} services are available."
+          end
+          to_ping = results.compact.map do |result|
+            endpoint_class.constantize.new(service_name, result[:entry].uri, service_version)
+          end
+          live_endpoints = to_ping.select {|endpoint| endpoint.ping }
+          if live_endpoints.blank?
+            raise ServiceUnavailableError, "No #{service_name} services are available."
+          else
+            endpoints[service_name][service_version] = live_endpoints
+            refreshed_times[service_name][service_version] = Time.now
+          end
+        ensure
           @refreshing = false
         end
       end
