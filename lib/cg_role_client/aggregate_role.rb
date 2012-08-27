@@ -45,8 +45,8 @@ module CgRoleClient
       return nil
     end
 
-    # Test if this aggregate role "is a" particular role.
-    def is_a?(role_name)
+    # Test if this aggregate role includes a particular role.
+    def include?(role_name)
       (role_for(role_name) != nil)
     end
   end
