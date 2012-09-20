@@ -84,6 +84,19 @@ module CgRoleClient
       end
     end
 
+    def create_actor_role(role, acting_entity)
+      request_url = uri_with_version + "actors/" + acting_entity.id.to_s + "/roles/"
+
+      request_options = {:body => role.to_json,
+                         :method => :post,
+                         :headers => {"Accept" => "application/json", "Content-Type" => "application/json; charset=utf-8"},
+                         :params => {:actor_type => acting_entity.class.name},
+                         :timeout => REQUEST_TIMEOUT}
+      run_request(request_url, request_options) do |response|
+        CgRoleClient::Role.new.from_json(response.body)
+      end
+    end
+
     def find_group_roles_on_target(group_id, target_type, target_id)
       request_url = uri_with_version + "groups/" + group_id.to_s + "/roles/"
 

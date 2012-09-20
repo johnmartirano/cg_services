@@ -39,11 +39,17 @@ module CgRoleClient
         # Grant a new role for an actor or group on a target. Target
         # must be an entity with an ID.
       def grant(role_type, actor_or_group, target)
-        group = group_for(actor_or_group)
-        role = Role.new({:role_type_id => role_type.id,
-                         :group_id => group.id,
-                         :target_id => target.id})
-        endpoint.create_role(role)
+        if actor_or_group.is_a? CgRoleClient::Group
+          role = Role.new({:role_type_id => role_type.id,
+                           :group_id => group.id,
+                           :target_id => target.id})
+          endpoint.create_role(role)
+        else
+          raise "TypeError: grant no longer accepts an actor as the parameter" if actor_or_group.is_a? CgRoleClient::Actor
+          role = Role.new({:role_type_id => role_type.id,
+                           :target_id => target.id})
+          endpoint.create_actor_role(role, actor_or_group)
+        end
       end
 
         # Get the aggregate role for an actor or group on a target.
