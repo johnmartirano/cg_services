@@ -34,14 +34,14 @@ module CgRoleClient
         end
       end
 
-      def find_by_target_type_and_actor(target_type,actor)
-        endpoint.find_target_by_target_type_and_actor_type_and_actor_id(target_type,actor.actor_type,actor.actor_id)
+      def find_by_target_type_and_actor(target_type,user)
+        endpoint.find_target_by_target_type_and_actor_type_and_actor_id(target_type,user.class.name,user.id)
       end
 
-      def find_by_actor_activities_and_target_types(actor, activities, target_types)#second two parameters should be lists of CgRoleClient::Activity.foo's and valid CgRoleClient::RoleType.target_type's respectively
+      def find_by_actor_activities_and_target_types(user, activities, target_types)#second two parameters should be lists of CgRoleClient::Activity.foo's and valid CgRoleClient::RoleType.target_type's respectively
         activity_ids = activities.map &:id
         target_type_strings = target_types.map &:to_s
-        endpoint.find_targets_with_activities_for_this_actor(actor, activity_ids, target_type_strings)
+        endpoint.find_targets_with_activities_for_this_actor(user, activity_ids, target_type_strings)
       end
     end
 

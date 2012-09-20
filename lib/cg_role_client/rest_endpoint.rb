@@ -249,8 +249,8 @@ module CgRoleClient
       actors
     end
 
-    def find_targets_with_activities_for_this_actor(actor, activity_ids, target_type_strings)
-      request_url = uri_with_version + "actors/" + actor.id.to_s + "/targets_with_activities"
+    def find_targets_with_activities_for_this_actor(user, activity_ids, target_type_strings)
+      request_url = uri_with_version + "actors/" + user.id.to_s + "/targets_with_activities"
       request_options = {:method => :get,
                          :headers => {"Accept" => "application/json"},
                          :params => { :activities => activity_ids.to_json,#get around passing array by passing a string representation of it
@@ -260,7 +260,7 @@ module CgRoleClient
                          # see http://groups.google.com/group/typhoeus/browse_thread/thread/94a5ebf3c226acde?pli=1
                          # and Typhoeus::Utils param string methods
                          :target_types => target_type_strings.to_json,
-                         :actor_type => actor.actor_type },
+                         :actor_type => user.actor_type },
                          :timeout => REQUEST_TIMEOUT,
                          :cache_timeout => 5 * 60} # set the cache timeout to 5 minutes, since search is what uses this and its cache times out at 5 minutes
       #cache_timeout?
