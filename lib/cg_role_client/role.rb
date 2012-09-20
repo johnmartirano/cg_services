@@ -91,15 +91,6 @@ module CgRoleClient
         CgRoleClient::AggregateRole.new(roles)
       end
 
-      def group_for(actor_or_group)
-        group = actor_or_group
-        if actor_or_group.kind_of? CgRoleClient::Actor
-          group = endpoint.find_singleton_group_by_actor_id(actor_or_group.id)
-        end
-        group
-      end
-
-      private :group_for
     end
 
     def initialize(attributes = {})

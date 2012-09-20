@@ -284,20 +284,17 @@ module CgRoleClient
 
       actors = []
       run_request(request_url, request_options) do |response|
-        decoded_actors = ActiveSupport::JSON.decode(response.body)
-        decoded_actors.each do |actor_attributes|
-          actors << CgRoleClient::Actor.new(actor_attributes)
-        end
+        actors = ActiveSupport::JSON.decode(response.body)
       end
       actors
     end
 
-    def add_actor_to_group(group_id, actor)
+    def add_actor_to_group(group_id, user)
       request_url = uri_with_version + "groups/" + group_id.to_s + "/actors/"
 
-      request_options = {:body => actor.to_json,
-                         :method => :post,
+      request_options = {:method => :post,
                          :headers => {"Accept" => "application/json", "Content-Type" => "application/json; charset=utf-8"},
+                         :params => {:actor_type => user.class.name, :actor_id => user.id},
                          :timeout => REQUEST_TIMEOUT}
 
       run_request(request_url, request_options) do |response|
@@ -305,12 +302,12 @@ module CgRoleClient
       end
     end
 
-    def remove_actor_from_group(group_id, actor)
+    def remove_actor_from_group(group_id, user)
       request_url = uri_with_version + "groups/" + group_id.to_s + "/actors/"
       
-      request_options = {:body => actor.to_json,
-                         :method => :delete,
+      request_options = {:method => :delete,
                          :headers => {"Accept" => "application/json", "Content-Type" => "application/json; charset=utf-8"},
+                         :params => {:actor_type => user.class.name, :actor_id => user.id},
                          :timeout => REQUEST_TIMEOUT}
 
       run_request(request_url, request_options) do |response|

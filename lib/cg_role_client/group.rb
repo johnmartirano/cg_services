@@ -69,12 +69,14 @@ module CgRoleClient
       end
     end
 
-    def add(actor)
-      Group.endpoint.add_actor_to_group(@id, actor)
+    def add(user)
+      raise "TypeError: add no longer accepts an actor as the parameter" if user.is_a? CgRoleClient::Actor
+      Group.endpoint.add_actor_to_group(@id, user)
     end
 
-    def remove(actor)
-      Group.endpoint.remove_actor_from_group(@id, actor)
+    def remove(user)
+      raise "TypeError: remove no longer accepts an actor as the parameter" if user.is_a? CgRoleClient::Actor
+      Group.endpoint.remove_actor_from_group(@id, user)
     end
 
     def actors
