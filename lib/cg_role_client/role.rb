@@ -48,18 +48,33 @@ module CgRoleClient
 
         # Get the aggregate role for an actor or group on a target.
         # See CgRoleClient::AggregateRole
-      def aggregate_role(actor_or_group, target)
+      def aggregate_role(acting_entity, target)
+        raise "TypeError: aggregate_role no longer accepts an actor as the parameter" if acting_entity.is_a? CgRoleClient::Actor
         if target.class == Hash
           target = target
         else
           target = {:class => target.class, :id => target.id}
         end
         begin
-          if actor_or_group.kind_of? CgRoleClient::Actor
-            roles = endpoint.find_actor_roles_on_target(actor_or_group.id, target[:class], target[:id])
+            roles = endpoint.find_actor_roles_on_target(acting_entity, target[:class], target[:id])
+        rescue => e
+          if e.kind_of?(CgServiceClient::Exceptions::ClientError) && e.http_code == 404
+            roles = []
           else
-            roles = endpoint.find_group_roles_on_target(actor_or_group.id, target[:class], target[:id])
+            raise
           end
+        end
+        CgRoleClient::AggregateRole.new(roles)
+      end
+
+      def aggregate_role_group(group, target)
+        if target.class == Hash
+          target = target
+        else
+          target = {:class => target.class, :id => target.id}
+        end
+        begin
+          roles = endpoint.find_group_roles_on_target(group.id, target[:class], target[:id])
         rescue => e
           if e.kind_of?(CgServiceClient::Exceptions::ClientError) && e.http_code == 404
             roles = []
