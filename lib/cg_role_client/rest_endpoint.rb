@@ -260,7 +260,7 @@ module CgRoleClient
                          # see http://groups.google.com/group/typhoeus/browse_thread/thread/94a5ebf3c226acde?pli=1
                          # and Typhoeus::Utils param string methods
                          :target_types => target_type_strings.to_json,
-                         :actor_type => user.actor_type },
+                         :actor_type => user.class.name },
                          :timeout => REQUEST_TIMEOUT,
                          :cache_timeout => 5 * 60} # set the cache timeout to 5 minutes, since search is what uses this and its cache times out at 5 minutes
       #cache_timeout?

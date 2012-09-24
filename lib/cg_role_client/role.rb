@@ -52,10 +52,11 @@ module CgRoleClient
         end
       end
 
-        # Get the aggregate role for an actor or group on a target.
-        # See CgRoleClient::AggregateRole
+      # Get the aggregate role for an acting_entity on a target.
+      # See CgRoleClient::AggregateRole
       def aggregate_role(acting_entity, target)
-        raise "TypeError: aggregate_role no longer accepts an actor as the parameter" if acting_entity.is_a? CgRoleClient::Actor
+        raise "TypeError: aggregate_role no longer accepts an actor as the parameter: #{Kernel.caller(0)}" if acting_entity.is_a? CgRoleClient::Actor
+
         if target.class == Hash
           target = target
         else
@@ -73,6 +74,8 @@ module CgRoleClient
         CgRoleClient::AggregateRole.new(roles)
       end
 
+      # Get the aggregate role for a group on a target.
+      # See CgRoleClient::AggregateRole
       def aggregate_role_group(group, target)
         if target.class == Hash
           target = target
