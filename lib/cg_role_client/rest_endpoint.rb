@@ -237,10 +237,7 @@ module CgRoleClient
       actors = []
       begin
         run_request(request_url, request_options) do |response|
-          decoded_actors = ActiveSupport::JSON.decode(response.body)
-          decoded_actors.each do |actor_attributes|
-            actors << CgRoleClient::Actor.new(actor_attributes)
-          end
+          actors = ActiveSupport::JSON.decode(response.body)
         end
       rescue ::CgServiceClient::Exceptions::ClientError => e
         raise unless e.http_code == 404
@@ -359,10 +356,7 @@ module CgRoleClient
       actors = []
       begin
         run_request(request_url, request_options) do |response|
-          decoded_actors = ActiveSupport::JSON.decode(response.body)
-          decoded_actors.each do |actor_attributes|
-            actors << CgRoleClient::Actor.new(actor_attributes)
-          end
+          actors = ActiveSupport::JSON.decode(response.body)
         end
       rescue ::CgServiceClient::Exceptions::ClientError => e
         raise unless e.http_code == 404

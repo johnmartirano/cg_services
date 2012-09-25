@@ -37,16 +37,13 @@ module CgRoleClient
         end
       end
 
+      # Get rid of this somehow?
       def create(attributes = {})
         actor = CgRoleClient::Actor.new(attributes)
         if !actor.valid? || !actor.id.nil?
           return false
         end
         endpoint.create_actor(actor)
-      end
-
-      def find_by_actor_type_and_actor_id(actor_type, actor_id)
-        endpoint.find_actor_by_actor_type_and_actor_id(actor_type,actor_id)
       end
 
       def find_with_roles_on_target(target_id, target_type)
