@@ -41,7 +41,7 @@ module CgRoleClient
       def grant(role_type, actor_or_group, target)
         if actor_or_group.is_a? CgRoleClient::Group
           role = Role.new({:role_type_id => role_type.id,
-                           :group_id => group.id,
+                           :group_id => actor_or_group.id,
                            :target_id => target.id})
           endpoint.create_role(role)
         else
