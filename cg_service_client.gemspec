@@ -1,6 +1,4 @@
-# -*- encoding: utf-8 -*-i
-lib = File.expand_path('../lib/', __FILE__)
-$:.unshift lib unless $:.include?(lib)
+require 'gem/dependency_management'
 
 Gem::Specification.new do |s|
   s.name        = "cg_service_client"
@@ -11,10 +9,12 @@ Gem::Specification.new do |s|
   s.description = "Client library for CG web service clients."
   s.summary     = ""
 
-  s.add_dependency "rake", "0.8.7"
-  s.add_dependency "rspec", "~> 2.5.0"
-  s.add_dependency "activemodel", ">= 3.0.0"
-  s.add_dependency "activesupport", ">= 3.0.0"
+  s.set_parent 'scholar'
+
+  s.add_dependency "rake"
+  s.add_dependency "rspec"
+  s.add_dependency "activemodel"
+  s.add_dependency "activesupport"
   s.add_dependency "cg_lookup_client", "~> 0.5.16"
 
   s.files        = Dir.glob("{lib,spec}/**/*")
