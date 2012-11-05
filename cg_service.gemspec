@@ -13,8 +13,6 @@ Gem::Specification.new do |s|
 
   s.add_dependency 'activerecord', '= 3.0.12'
   s.add_dependency 'activerecord_threadsafe_fix', '= 3.0.12.1'
-  s.add_dependency 'pg'
-  s.add_dependency 'thin', '1.2.8'
   s.add_dependency 'sinatra', '>= 1.2.1'
   s.add_dependency 'sinatra-reloader'
   s.add_dependency 'json', '>=1.4.6'
