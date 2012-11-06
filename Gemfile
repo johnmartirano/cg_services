@@ -1,7 +1,7 @@
 source 'http://rubygems.org'
 source 'http://build.commongroundpublishing.com/gems'
 
-gem 'cg_service', '~> 0.7.16'
+gem 'cg_service', '~> 0.7.19'
 # gem 'cg_service', :path => '../cg_service'
 
 if RUBY_PLATFORM =~ /java/
@@ -14,7 +14,7 @@ group :development, :test do
     gem 'tux'
     gem 'sqlite3'
   end
-  gem 'cg_tasks', '~> 1.1.10'
+  gem 'cg_tasks', '~> 2.0.3'
 end
 
 group :test do
