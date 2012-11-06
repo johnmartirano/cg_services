@@ -135,13 +135,15 @@ module CgLookupClient
       registered
     end
 
-      # Lookup registered types with the specified version. Lookup is performed
-      # across all endpoints. The first matching entry found is returned.
-      #
-      # Returns a Hash containing the first matching entry, and a potential
-      # message from the endpoint, typically a success message. If the lookup
-      # fails for whatever reason, an error message will be returned instead,
-      # along with a nil entry. Hash keys are :entry and :message.
+    # Lookup registered types with the specified version. Lookup is
+    # performed across all endpoints. All matching entries found
+    # are returned.
+    #
+    # Returns an Array where each member is a Hash containing the
+    # matching entry, and a potential message from the endpoint,
+    # typically a success message. If the lookup fails for whatever
+    # reason, an error message will be returned instead, along with a
+    # nil entry. Hash keys are :entry and :message.
     def self.lookup(type, version)
       Entry.ensure_configured
       lookup_from_all_endpoints(type, version)

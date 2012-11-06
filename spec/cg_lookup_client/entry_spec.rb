@@ -167,7 +167,10 @@ module CgLookupClient
       end
 
       it "should lookup an entry that matches on type and version" do
-        result = Entry.lookup("Testing","1")
+        results = Entry.lookup("Testing","1")
+
+        results.size.should >= 1
+        result = results[0]
         result[:entry].type_name.should == "Testing"
         result[:entry].version.should == "1"
         result[:entry].uri.should == 'http://localhost:3000/'
