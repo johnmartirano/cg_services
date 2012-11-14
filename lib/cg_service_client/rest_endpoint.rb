@@ -29,7 +29,7 @@ module CgServiceClient
 
           self.refresh(service_name, service_version, endpoint_class)
         end
-        endpoints[service_name][service_version].choice
+        endpoints[service_name][service_version].sample
       end
       
       #get the current good endpoints from lookup service
