@@ -21,7 +21,7 @@ group :test do
   gem 'rspec', '>=2.5.0'
   gem 'rack-test', '=0.5.6'
   unless RUBY_PLATFORM =~ /java/
-    gem 'debugger'
+    # gem 'debugger'
   end
 end
 
