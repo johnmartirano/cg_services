@@ -8,6 +8,10 @@ module CgRoleClient
     SECONDS_IN_A_DAY = 86400
     SECONDS_IN_A_YEAR = SECONDS_IN_A_DAY * 365
     REQUEST_TIMEOUT = CgServiceClient::RestEndpoint::REQUEST_TIMEOUT
+
+    # A "short" cache timeout to help in successive page loads but not
+    # hang around a long time.  Exact time may need to be reevaluated.
+    CACHE_SHORT = 60 # seconds
     
     def initialize(name, uri, version)
       super
@@ -111,6 +115,7 @@ module CgRoleClient
       request_options = {:method => :get,
                          :headers => {"Accept" => "application/json"},
                          :params  => {:target_type => target_type, :target_id => target_id},
+                         :cache_timeout => CACHE_SHORT,
                          :timeout => REQUEST_TIMEOUT}
 
       roles = []
