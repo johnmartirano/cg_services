@@ -103,32 +103,40 @@ module CgLookupClient
       attrs.each_pair { |k, v| send("#{k}=", v) }
     end
 
-      # Register the specified entry with all lookup service endpoints. Renewal
-      # is handled automatically after initial registration and continues
-      # for the lifetime of the loaded Entry class.
-      #
-      # Required attributes are: type_name (the type of resource), description
-      # (implementation details), uri (the location of the resource), and version
-      # (version of the resource).
-      #
-      # A callback block may be optionally passed to this method that takes a
-      # single parameter, a hash containing the following keys:
-      # 1) endpoint => the address of the endpoint that the Entry was attempted
-      # to be registered with, 2) id => the ID of the entry at the specific
-      # endpoint, 3) success => whether or not the registration succeeded, and
-      # 4) message => any message associated with the result.
-      #
-      # Returns an Array of Entry instances, as created by the respective
-      # endpoints. Thus, a returned Entry will contain an ID set by the endpoint.
-      # The ID is of little value, except for removing an Entry from an endpoint,
-      # which is not currently supported by this API.
-      #
+    # Register the specified entry with all lookup service
+    # endpoints. Renewal is handled automatically after initial
+    # registration and continues for the lifetime of the loaded Entry
+    # class.
+    #
+    # Starts a thread to perform periodic renewals in the background
+    # if it has not already been started.
+    #
+    # Required attributes are: type_name (the type of resource),
+    # description (implementation details), uri (the location of the
+    # resource), and version (version of the resource).
+    #
+    # A callback block may be optionally passed to this method that
+    # takes a single parameter, a hash containing the following keys:
+    # 1) endpoint => the address of the endpoint that the Entry was
+    # attempted to be registered with, 2) id => the ID of the entry at
+    # the specific endpoint, 3) success => whether or not the
+    # registration succeeded, and 4) message => any message associated
+    # with the result.
+    #
+    # Returns an Array of Entry instances, as created by the respective
+    # endpoints. Thus, a returned Entry will contain an ID set by the endpoint.
+    # The ID is of little value, except for removing an Entry from an endpoint,
+    # which is not currently supported by this API.
     def register(&callback)
       Entry.ensure_configured
       registered = []
       if valid?
         Entry.entries_monitor.synchronize do
           Entry.entries[self] = callback
+          # start renewal thread on first entry
+          if Entry.entries.size == 1
+            CgLookupClient::Entry.start_renewal_thread
+          end
           registered = CgLookupClient::Entry.register_with_all_endpoints(self)
         end
       end
@@ -243,8 +251,6 @@ module CgLookupClient
     end
 
   end
-
-  CgLookupClient::Entry.start_renewal_thread
 
     # Error for when user attempts to configure an unsupported endpoint version.
   class UnsupportedEndpointVersionError < StandardError;
