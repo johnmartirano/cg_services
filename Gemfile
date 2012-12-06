@@ -20,10 +20,6 @@ end
 group :test do
   gem 'rspec', '>=2.5.0'
   gem 'rack-test', '=0.5.6'
-  unless RUBY_PLATFORM =~ /java/
-    gem 'ruby-debug19'
-    gem 'ruby-debug-ide'
-  end
 end
 
 group :deployment do
