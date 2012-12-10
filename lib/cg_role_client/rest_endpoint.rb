@@ -8,6 +8,10 @@ module CgRoleClient
     SECONDS_IN_A_DAY = 86400
     SECONDS_IN_A_YEAR = SECONDS_IN_A_DAY * 365
     REQUEST_TIMEOUT = CgServiceClient::RestEndpoint::REQUEST_TIMEOUT
+
+    # A "short" cache timeout to help in successive page loads but not
+    # hang around a long time.  Exact time may need to be reevaluated.
+    CACHE_SHORT = 60 # seconds
     
     def initialize(name, uri, version)
       super
@@ -127,6 +131,7 @@ module CgRoleClient
                            :actor_type => acting_entity.class.name,
                            :target_type => target_type, 
                            :target_id => target_id},
+                         :cache_timeout => CACHE_SHORT,
                          :timeout => REQUEST_TIMEOUT}
 
       roles = []
@@ -323,9 +328,10 @@ module CgRoleClient
       targets = []
       begin
         run_request(request_url, request_options) do |response|
-          decoded_target_ids = ActiveSupport::JSON.decode(response.body)
-          decoded_target_ids.each do |target_id|
-            targets << CgRoleClient::Target.new({:target_id => target_id, :target_type => target_type})
+          roles = ActiveSupport::JSON.decode(response.body)
+          roles.each do |role_attrs|
+            role = CgRoleClient::Role.new(role_attrs)
+            targets << CgRoleClient::Target.new({:target_id => role.target_id, :target_type => target_type, :role => role})
           end
         end
       rescue ::CgServiceClient::Exceptions::ClientError => e

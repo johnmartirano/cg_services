@@ -12,7 +12,7 @@ module CgRoleClient
 
     uses_service("Role","1","CgRoleClient::RestEndpoint")
 
-    serializable_attr_accessor :target_id, :target_type
+    serializable_attr_accessor :target_id, :target_type, :role
 
     class << self
       include Aspect4r
