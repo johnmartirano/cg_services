@@ -109,6 +109,7 @@ module CgService
     cset :service_config, 'config/service.yml'
     cset :database_config, 'config/database.yml'
     cset :logger_config, 'config/log4j.properties'
+    cset :dump_errors, true
 
     cset :lookup_service_uri, 'http://localhost:5000/'
     cset :lookup_service_version, '1'
@@ -170,6 +171,10 @@ module CgService
         logger.info {
           request.request_method + "  " + request.url + "  " + request.ip
         }
+      end
+
+      error do
+        logger.error env['sinatra.error'].backtrace.join("\n\t")
       end
 
       after do
