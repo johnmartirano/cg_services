@@ -10,9 +10,7 @@ module CgRoleClient
   # So, an actor or group is granted permission to perform activities
   # on a target by means of the role type a role is associated with.
   class Activity
-    include ActiveModel::Validations
-    include CgServiceClient::Serializable
-    extend CgServiceClient::Serviceable
+    include CgServiceClient::Base
 
     serializable_attr_accessor :id, :code, :name, :created_at, :updated_at
 
@@ -22,8 +20,8 @@ module CgRoleClient
       # Enables activities to be found using statements
       # such as, Activity.read, Activity.write, etc.
       def method_missing(sym, *args, &block)
-        puts "CgRoleClient::Activity.activity is deprecated, use CgRoleClient::Activity[:activity]"
-        puts "Called by #{caller.first}"
+        logger.warn "CgRoleClient::Activity.activity is deprecated, use CgRoleClient::Activity[:activity]"
+        logger.warn "Called by #{caller.first}"
         self[sym]
       end
 
@@ -38,7 +36,8 @@ module CgRoleClient
           @cache ||= {}
           @cache[sym.to_s] ||= endpoint.find_activity_by_code(sym.to_s)
         rescue Exception => e
-          puts e
+          logger.error e
+          logger.error e.backtrace.join("\n\t")
           raise
         end
       end
@@ -63,5 +62,4 @@ module CgRoleClient
     end
 
   end
-
 end

@@ -7,10 +7,7 @@ module CgRoleClient
   # A role type groups together a named set of activities that an actor or group
   # may be associated with by virtue of a granted role.
   class RoleType
-    include Aspect4r
-    include ActiveModel::Validations
-    include CgServiceClient::Serializable
-    extend CgServiceClient::Serviceable
+    include CgServiceClient::Base
 
     uses_service("Role", "1", "CgRoleClient::RestEndpoint")
 
@@ -20,45 +17,33 @@ module CgRoleClient
     validates_length_of :role_name, :target_type, :maximum=>255
 
     class << self
-
-      around :all, :find, :find_by_role_name_and_target_type do |*args, &block|
-        begin
-          block.call(*args)
-        rescue Errno::ECONNREFUSED => e
-          begin
-            block.call(*args)
-          rescue Exception => e
-            puts e
-            raise
-          end
-        rescue Exception => e
-          puts e
-          raise
+      def all
+        try_service_call do
+          endpoint.find_all_role_types
         end
       end
 
-      def all
-        endpoint.find_all_role_types
-      end
-
       def find(id)
-        endpoint.find_role_type_by_id(id)
+        try_service_call do
+          endpoint.find_role_type_by_id(id)
+        end
       end
 
       def find_by_role_name_and_target_type(role_name, target_type)
-        endpoint.find_role_type_by_role_name_and_target_type(role_name, target_type)
+        try_service_call do
+          endpoint.find_role_type_by_role_name_and_target_type(role_name, target_type)
+        end
       end
 
       def method_missing(sym, *args, &block)
-        puts "CgRoleClient::RoleType.role_type('target_type') is deprecated, use CgRoleClient::RoleType.get(:role_type, 'target_type')"
-        puts "Called by #{caller.first}"
+        logger.warn "CgRoleClient::RoleType.role_type('target_type') is deprecated, use CgRoleClient::RoleType.get(:role_type, 'target_type')"
+        logger.warn "Called by #{caller.first}"
         self.find(sym.to_s, *args)
       end
 
       def get(sym, *args)
         find_by_role_name_and_target_type(sym.to_s, *args)
       end
-
     end
 
     def initialize(attributes = {})
@@ -66,14 +51,9 @@ module CgRoleClient
     end
 
     def activities
-      begin
-        RoleType.endpoint.find_role_type_activities_by_role_type_id(@id)
-      rescue Exception => e
-        puts e
-        raise
+      try_service_call do
+        endpoint.find_role_type_activities_by_role_type_id(@id)
       end
     end
-
   end
-
 end
