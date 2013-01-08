@@ -9,8 +9,6 @@ module CgServiceClient
   module Serviceable
     ENDPOINT_FLUSH_INTERVAL_IN_SEC = 60
 
-    attr_reader :endpoint
-
     # Looks up the given service and instantiates the given RestEndpoint.
     # Makes available a class instance variable, @endpoint, that can be
     # used to interact with the endpoint. The endpoint will be periodically
@@ -32,6 +30,5 @@ module CgServiceClient
         ep
       end
     end
-
   end
 end
