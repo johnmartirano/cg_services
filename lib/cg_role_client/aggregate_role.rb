@@ -7,7 +7,6 @@ module CgRoleClient
   # role for certain activities the actor or group
   # is allowed to perform.
   class AggregateRole
-
     def initialize(roles=[])
       @roles = roles
       @activities = Set.new
