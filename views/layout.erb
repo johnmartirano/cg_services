@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title><%= @title %></title>
+  <style>
+      /* Style Reset ------------------------------------------- */
+
+      body, div, dl, dt, dd, ul, ol, li, h1, h2, h3,
+      h4, h5, h6, pre, form, fieldset, input,
+      textarea, p, blockquote, th, td {
+          margin: 0;
+          padding: 0;
+      }
+
+      table {
+          border-collapse: collapse;
+          border-spacing: 0;
+      }
+
+      fieldset, img {
+          border: 0;
+      }
+
+      address, caption, cite, code, dfn, th, var {
+          font-style: normal;
+          font-weight: normal;
+      }
+
+      ol, ul {
+          list-style: none;
+      }
+
+      caption, th {
+          text-align: left;
+      }
+
+      h1, h2, h3, h4, h5, h6 {
+          font-weight: normal;
+      }
+
+      q:before, q:after {
+          content: '';
+      }
+
+      abbr, acronym {
+          border: 0;
+      }
+
+      :focus {
+          outline: 0;
+      }
+
+      /* General ------------------------------------------- */
+
+      .displayNone {
+          display: none;
+      }
+
+      .floatLeft {
+          float: left;
+      }
+
+      .floatRight {
+          float: right;
+      }
+
+      hr {
+          display: none;
+      }
+
+      /* Page ------------------------------------------- */
+
+      body {
+          font-family: Helvetica, Arial, sans-serif;
+          font-size: 16px;
+          line-height: 18px;
+          text-align: center;
+          background: #EEE;
+      }
+
+      #wrapper {
+          text-align: left;
+          background: #FFF;
+          width: 900px;
+          margin: 0 auto;
+      }
+
+      #masthead {
+          position: relative;
+      }
+
+      #content {
+          padding: 40px;
+          clear: both;
+      }
+
+      #footer {
+          border-top: 1px solid #EEE;
+          padding: 40px 0;
+          clear: both;
+      }
+
+      /* Header ------------------------------------------- */
+
+      #masthead h1 {
+          font-size: 12px;
+          line-height: 15px;
+          font-weight: bold;
+          color: #000;
+          position: absolute;
+          top: 40px;
+          left: -80px;
+      }
+
+      /* Content ------------------------------------------- */
+
+      #content {
+          font-size: 13px;
+          line-height: 17px;
+          color: #000;
+      }
+
+      #content a:link,
+      #content a:active,
+      #content a:visited {
+          color: #007CB2;
+          text-decoration: none;
+      }
+
+      #content a:hover {
+          text-decoration: underline;
+      }
+
+      #content h2 {
+          font-size: 20px;
+          line-height: 26px;
+          font-weight: bold;
+          color: #00628c;
+          margin: 0 0 20px 0;
+      }
+
+      #content h3 {
+          font-size: 16px;
+          line-height: 20px;
+          font-weight: bold;
+          color: #00628c;
+          margin: 50px 0 20px 0;
+      }
+
+      #content p {
+          margin: 0 0 18px 0;
+      }
+
+      #content ol {
+          list-style-type: decimal;
+          padding: 0 20px;
+          margin: 0 0 18px 0;
+      }
+
+      #content ul {
+          list-style-type: square;
+          padding: 0 20px;
+          margin: 0 0 18px 0;
+      }
+
+      #content ul li,
+      #content ol li {
+          margin: 0 0 6px 0;
+      }
+
+      /* Tables ------------------------------------------- */
+
+      #content table {
+          font-size: 11px;
+          line-height: 15px;
+          color: #000;
+          background: #fff;
+          border: 0;
+          width: 100%;
+          margin: 10px 0;
+      }
+
+      #content table caption {
+          font-size: 13px;
+          line-height: 17px;
+          font-weight: bold;
+          color: #FFF;
+          background: #00628c;
+          padding: 6px 12px;
+          margin: 0 0 1px 0;
+      }
+
+      #content table a:link,
+      #content table a:active,
+      #content table a:visited {
+          color: #007CB2;
+          text-decoration: none;
+      }
+
+      #content table a:hover {
+          text-decoration: underline;
+      }
+
+      #content table th {
+          font-weight: bold;
+          background: #ccedf5;
+          padding: 6px 12px;
+          border-bottom: 1px solid #fff;
+          border-right: 1px solid #fff;
+      }
+
+      #content table .tableHeaderLast {
+          border-right: none;
+      }
+
+      #content table tr {
+          border-bottom: 1px solid #ccc;
+      }
+
+      #content table tr:hover {
+          background: #ffffcc;
+      }
+
+      #content table td {
+          padding: 12px;
+      }
+
+
+  </style>
+</head>
+<body>
+
+<div id="wrapper">
+
+  <div id="masthead">
+    <h1><img src="/images/logo_cg.gif" alt="Common Ground"></h1>
+  </div>
+
+  <div id="content">
+    <%= yield %>
+  </div>
+
+</div>
+
+</body>
+
+</html>
