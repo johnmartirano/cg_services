@@ -19,29 +19,33 @@ module CgRoleClient
       # must be an entity with an ID.
       def grant(role_type, actor_or_group, target)
         try_service_call do
-          group = group_for(actor_or_group)
-          role = Role.new({:role_type_id => role_type.id,
-                            :group_id => group.id,
-                            :target_id => target.id})
-          endpoint.create_role(role)
+          if actor_or_group.is_a? CgRoleClient::Group
+            role = Role.new({:role_type_id => role_type.id,
+                              :group_id => actor_or_group.id,
+                              :target_id => target.id})
+            endpoint.create_role(role)
+          else
+            raise "TypeError: grant no longer accepts an actor as the parameter" if actor_or_group.is_a? CgRoleClient::Actor
+            role = Role.new({:role_type_id => role_type.id,
+                             :target_id => target.id})
+            endpoint.create_actor_role(role, actor_or_group)
+          end
         end
       end
 
       # Get the aggregate role for an actor or group on a target.  See
       # CgRoleClient::AggregateRole
-      def aggregate_role(actor_or_group, target)
+      def aggregate_role(acting_entity, target)
         try_service_call do
+          raise "TypeError: aggregate_role no longer accepts an actor as the parameter: #{Kernel.caller(0)}" if acting_entity.is_a? CgRoleClient::Actor
+
           if target.class == Hash
             target = target
           else
             target = {:class => target.class, :id => target.id}
           end
           begin
-            if actor_or_group.kind_of? CgRoleClient::Actor
-              roles = endpoint.find_actor_roles_on_target(actor_or_group.id, target[:class], target[:id])
-            else
-              roles = endpoint.find_group_roles_on_target(actor_or_group.id, target[:class], target[:id])
-            end
+            roles = endpoint.find_actor_roles_on_target(acting_entity, target[:class], target[:id])
           rescue => e
             if e.kind_of?(CgServiceClient::Exceptions::ClientError) && e.http_code == 404
               roles = []
