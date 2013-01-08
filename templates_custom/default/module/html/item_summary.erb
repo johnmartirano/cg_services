@@ -1,0 +1,37 @@
+<% if @item[:http_method] %>
+
+<tr>
+  <td><%= @item[:http_method].upcase %>
+  <td style="white-space:nowrap;"><%= @item[:url] %>
+  <td>
+    <ul>
+      <% if_tags(@item.tags(:param)) do |p| %>
+        <li><%= p.name %> [<%= p.types ? p.types.join(', ') : '' %>]</li>
+      <% end %>
+    </ul>
+  </td>
+  <td>
+    <ul>
+      <% if_tags(@item.tags(:request_param)) do |p| %>
+        <li><%= p.name %> [<%= p.types ? p.types.join(', ') : '' %>]</li>
+      <% end %>
+    </ul>
+  </td>
+  <td>
+    <% if_tag(@item.tag(:request_body)) do |body| %>
+      <%= body ? body.types.join(', ') : '' %>
+    <% end %>
+  </td>
+  <td>
+    <% if_tag(@item.tag(:return)) do |ret| %>
+      <%= ret.types.join(', ')%>
+    <% end %>
+  </td>
+  <td><%= docstring_summary(@item) %></td>
+</tr>
+
+<% else %>
+
+  <%#= skipped %>
+
+<% end %>
