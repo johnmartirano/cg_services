@@ -1,1 +1,1 @@
-rvm use 1.9.3-perf@cg_lookup_service --create
+rvm use ruby-1.9.3-p327-perf@cg_lookup_service --create
