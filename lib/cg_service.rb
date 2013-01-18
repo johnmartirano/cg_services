@@ -107,7 +107,12 @@ module CgService
     cset :environment, ENV['RACK_ENV'] || 'development'
 
     cset :service_config, 'config/service.yml'
-    cset :database_config, 'config/database.yml'
+    #detect and use mupp config file if appropriate
+    if settings.environment == 'development' && File.exist?('../../cg_author/app/assets') && File.exist?('config/database.yml.mupp')
+      cset :database_config, 'config/database.yml.mupp'
+    else
+      cset :database_config, 'config/database.yml'
+    end
     cset :logger_config, 'config/log4j.properties'
     cset :dump_errors, true
 
