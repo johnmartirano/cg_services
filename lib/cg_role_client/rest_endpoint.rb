@@ -115,7 +115,6 @@ module CgRoleClient
       request_options = {:method => :get,
                          :headers => {"Accept" => "application/json"},
                          :params  => {:target_type => target_type, :target_id => target_id},
-                         :cache_timeout => CACHE_SHORT,
                          :timeout => REQUEST_TIMEOUT}
 
       roles = []
