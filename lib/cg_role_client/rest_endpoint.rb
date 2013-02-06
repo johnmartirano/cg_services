@@ -352,9 +352,9 @@ module CgRoleClient
         run_request(request_url, request_options) do |response|
           response.body
         end
-        rescue ::CgServiceClient::Exceptions::ClientError => e
-          raise unless e.http_code == 404
-        end
+      rescue ::CgServiceClient::Exceptions::ClientError => e
+        raise unless e.http_code == 404
+      end
     end
 
     def find_actors_by_target_and_target_type_and_activities(target_id, target_type, activity_ids)
