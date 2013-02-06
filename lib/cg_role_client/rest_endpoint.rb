@@ -341,7 +341,6 @@ module CgRoleClient
     end
 
     def remove_role(role_id)
-      debugger
       request_url = uri_with_version + "roles/" + role_id.to_s
 
       request_options = {:method => :delete,
@@ -354,7 +353,6 @@ module CgRoleClient
           response.body
         end
         rescue ::CgServiceClient::Exceptions::ClientError => e
-          debugger
           raise unless e.http_code == 404
         end
     end
