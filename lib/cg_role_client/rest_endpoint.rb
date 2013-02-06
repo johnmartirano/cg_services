@@ -131,6 +131,7 @@ module CgRoleClient
                            :actor_type => acting_entity.class.name,
                            :target_type => target_type, 
                            :target_id => target_id},
+                         :cache_timeout => CACHE_SHORT, 
                          :timeout => REQUEST_TIMEOUT}
 
       roles = []
@@ -340,15 +341,22 @@ module CgRoleClient
     end
 
     def remove_role(role_id)
+      debugger
       request_url = uri_with_version + "roles/" + role_id.to_s
 
       request_options = {:method => :delete,
                          :headers => {"Accept" => "application/json", "Content-Type" => "application/json; charset=utf-8"},
                          :timeout => REQUEST_TIMEOUT}
 
-      run_request(request_url, request_options) do |response|
-        response.body
-      end
+
+      begin
+        run_request(request_url, request_options) do |response|
+          response.body
+        end
+        rescue ::CgServiceClient::Exceptions::ClientError => e
+          debugger
+          raise unless e.http_code == 404
+        end
     end
 
     def find_actors_by_target_and_target_type_and_activities(target_id, target_type, activity_ids)
