@@ -5,6 +5,8 @@ require 'active_model'
 require 'active_support'
 require 'active_support/hash_with_indifferent_access'
 
+require 'cg_lookup_client/uri_with_version'
+
 module CgLookupClient
 
   # The client side of the CG Lookup Service. Represents a registered Entry
@@ -15,6 +17,7 @@ module CgLookupClient
   #
   # This class is thread safe.
   class Entry
+    include UriWithVersion
     include ActiveModel::Serializers::JSON
     include ActiveModel::Validations
 
@@ -83,10 +86,6 @@ module CgLookupClient
 
     def initialize(attributes = {})
       self.attributes = attributes
-      if !@uri.nil? && @uri.length > 1
-        @uri << '/' if @uri[-1].chr != '/'
-      end
-      @version = @version.to_s
     end
 
     def attributes
@@ -143,47 +142,13 @@ module CgLookupClient
       registered
     end
 
-    # Lookup registered types with the specified version. Lookup is
-    # performed across all endpoints. All matching entries found
-    # are returned.
-    #
-    # Returns an Array where each member is a Hash containing the
-    # matching entry, and a potential message from the endpoint,
-    # typically a success message. If the lookup fails for whatever
-    # reason, an error message will be returned instead, along with a
-    # nil entry. Hash keys are :entry and :message.
-    def self.lookup(type, version)
-      Entry.ensure_configured
-      lookup_from_all_endpoints(type, version)
-    end
-
-    def eql?(object)
-      if object.equal?(self)
-        return true
-      elsif !self.class.equal?(object.class)
-        return false
-      end
-
-      object.composite_id.eql? composite_id
-    end
-
-    def hash
-      uri.hash+version.hash+type_name.hash
-    end
-
     def to_s
-      composite_id
+      uri_with_version + 'type_name'
     end
 
       # Helper to get the value of a particular attribute.
     def read_attribute_for_validation(key)
       send(key)
-    end
-
-    protected
-
-    def composite_id
-      uri+'v'+version+'/'+type_name
     end
 
     private
@@ -192,15 +157,6 @@ module CgLookupClient
       if @endpoints.empty?
         raise ::CgLookupClient::NoEndpointConfiguredError, "No endpoints are configured. Call Entry.configure_endpoint first."
       end
-    end
-
-    def self.lookup_from_all_endpoints(type, version)
-      @entries_monitor.synchronize do
-
-        @results = @endpoints.map {|ep| ep.lookup(type) }.flatten #async lookups required?
-        @matches = @results.select {|r| !r[:entry].nil? && r[:entry].version == version }
-      end
-      @matches
     end
 
     def self.register_with_all_endpoints(entry)

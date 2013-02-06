@@ -1,5 +1,25 @@
 require(File.join(File.dirname(__FILE__), '../spec_helper'))
 
+# Just a mock service to use during testing.
+class NotAliveService
+  attr_reader :uri, :version
+
+  def initialize(uri, version)
+    @uri, @version = uri, version
+  end
+
+  def ping
+    false
+  end
+end
+
+# Just a mock service to use during testing.
+class AliveService < NotAliveService
+  def ping
+    true
+  end
+end
+
 module CgLookupClient
 
   describe Entry do
@@ -32,10 +52,10 @@ module CgLookupClient
     end
 
     describe "#initialize" do
-      it "should ensure a trailing slash on the uri attribute" do
+      it "should not ensure a trailing slash on the uri attribute" do
         e = Entry.new({:type_name=>'type_name', :version=>'1',
                        :description=>'Desc', :uri=>'http://localhost:3000'})
-        e.uri[-1].chr.should == '/'
+        e.uri[-1].chr.should == '0'
       end
 
       it "should not add a trailing slash to the uri attribute if one exists" do
@@ -156,28 +176,14 @@ module CgLookupClient
 
     end
 
-    describe "#lookup" do
-
+    describe do
       before(:each) do
         Entry.clear_endpoints
         Entry.clear_entries
-
+        
         Entry.configure_endpoint(create_endpoint("http://localhost:5000/", "1"))
         Entry.configure_endpoint(create_endpoint("http://localhost:5001/", "1"))
       end
-
-      it "should lookup an entry that matches on type and version" do
-        results = Entry.lookup("Testing","1")
-
-        results.size.should >= 1
-        result = results[0]
-        result[:entry].type_name.should == "Testing"
-        result[:entry].version.should == "1"
-        result[:entry].uri.should == 'http://localhost:3000/'
-      end
-
     end
-
   end
-
 end
