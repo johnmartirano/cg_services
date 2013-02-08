@@ -2,15 +2,18 @@ module CgServiceClient
   # Service client classes should include Base.  It will then include
   # ActiveModel::Validations, CgServiceClient::Serializable,
   # CgServiceClient::Logger, CgServiceClient::ServiceCall and at the
-  # class level, include CgServiceClient::Serviceable and
-  # CgServiceClient::ServiceCall.
+  # class level, include CgServiceClient::Serviceable
   module Base
     include CgServiceClient::Logger
-    include CgServiceClient::ServiceCall
 
     def endpoint
       # endpoint is defined in CgServiceClient::Serviceable
       self.class.endpoint
+    end
+
+    def with_endpoint(&block)
+      # with_endpoint is defined in CgServiceClient::Serviceable
+      self.class.with_endpoint(&block)
     end
 
     def self.included(mod)
@@ -19,7 +22,6 @@ module CgServiceClient
       mod.send(:include, ActiveModel::Validations)
 
       mod.send(:extend, CgServiceClient::Serviceable)
-      mod.send(:extend, CgServiceClient::ServiceCall)
     end
   end
 end
