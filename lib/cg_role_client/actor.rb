@@ -1,5 +1,6 @@
 require 'active_model'
 require 'aspect4r'
+require 'cg_role_client/rest_endpoint'
 require 'cg_service_client'
 
 module CgRoleClient
@@ -9,7 +10,7 @@ module CgRoleClient
   class Actor
     include CgServiceClient::Base
 
-    uses_service("Role","1","CgRoleClient::RestEndpoint")
+    uses_service("Role","1",CgRoleClient::RestEndpoint)
 
     serializable_attr_accessor :id, :actor_id, :actor_type, :singleton_group_id, :created_at, :updated_at
 
@@ -17,23 +18,21 @@ module CgRoleClient
 
     class << self
       def create(attributes = {})
-        try_service_call do
-          actor = CgRoleClient::Actor.new(attributes)
-          if !actor.valid? || !actor.id.nil?
-            return false
-          end
-          endpoint.create_actor(actor)
+        actor = CgRoleClient::Actor.new(attributes)
+        if !actor.valid? || !actor.id.nil?
+          return false
         end
+        with_endpoint {|endpoint| endpoint.create_actor(actor) }
       end
 
       def find_by_actor_type_and_actor_id(actor_type, actor_id)
-        try_service_call do
+        with_endpoint do |endpoint|
           endpoint.find_actor_by_actor_type_and_actor_id(actor_type,actor_id)
         end
       end
 
       def find_with_roles_on_target(target_id, target_type)
-        try_service_call do
+        with_endpoint do |endpoint|
           endpoint.find_with_roles_on_target(target_id, target_type)
         end
       end
@@ -43,12 +42,12 @@ module CgRoleClient
       # @param an Array of Activity
       # @returns an array of Actor
       def find_by_target_with_activities(target, activities)
-        try_service_call do
-          return [] if target.nil?
+        return [] if target.nil?
 
-          target_id = target.id.to_s
-          target_type = target.class.name
-          activity_ids = activities.map &:id
+        target_id = target.id.to_s
+        target_type = target.class.name
+        activity_ids = activities.map &:id
+        with_endpoint do |endpoint|
           endpoint.find_actors_by_target_and_target_type_and_activities(target_id, target_type, activity_ids)
         end
       end
@@ -62,7 +61,7 @@ module CgRoleClient
     # Return this actor's singleton group. Each actor is associated
     # with a group that only it is a member of.
     def singleton_group
-      try_service_call do
+      with_endpoint do |endpoint|
         endpoint.find_singleton_group_by_actor_id(@id)
       end
     end
