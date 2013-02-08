@@ -8,19 +8,16 @@ module CgLookupClient
   class TestService
     include UriWithVersion
 
-    attr_accessor :alive
+    attr_accessor :name, :alive
 
-    def initialize(uri, version)
+    def initialize(name, uri, version)
+      @name = name
       set_uri_and_version(uri, version)
       @alive = true
     end
     
     def ping
       @alive
-    end
-
-    def name
-      'TestService'
     end
   end
 

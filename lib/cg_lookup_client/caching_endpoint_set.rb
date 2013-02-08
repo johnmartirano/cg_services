@@ -249,7 +249,7 @@ module CgLookupClient
       end
 
       alive = results.
-        map{|e| endpoint_class.new(e.uri, e.version) }.
+        map{|e| endpoint_class.new(type, e.uri, e.version) }.
         select{|e| e.ping }
       
       if alive.empty?
