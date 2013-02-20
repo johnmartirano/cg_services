@@ -2,105 +2,23 @@ require 'cg_lookup_client'
 
 module CgServiceClient
 
-  class ServiceUnavailableError < StandardError;
-  end
-
   # Generic base class for interacting with RESTFul service endpoints.
   class RestEndpoint
-
-    class << self
-      #class instance vars to govern the refresh process
-      def endpoints
-        @endpoints ||= Hash.new do |h,k|
-          h[k] = Hash.new {|h,k| h[k] = [] }
-        end
-      end
-
-      def refreshed_times
-        @refreshed_times ||= Hash.new { |h,k| h[k] = {} }
-      end
-
-      # a random selection from last known good endpoints of the given type
-      # refresh after two minutes or if there are no known good endpoints
-      def get(service_name, service_version, endpoint_class)
-        if endpoints[service_name][service_version].blank? ||
-           (refreshed_times[service_name][service_version] &&
-           Time.now - refreshed_times[service_name][service_version] > 2.minutes)
-
-          self.refresh(service_name, service_version, endpoint_class)
-        end
-        endpoints[service_name][service_version].sample
-      end
-      
-      #get the current good endpoints from lookup service
-      #could optimize by refreshing all endpoint types when we notice any type go down,
-      #since there is a uri per node/service and all the services on a node are likely down
-      def refresh(service_name, service_version, endpoint_class)
-        if !@refreshing &&
-           (refreshed_times[service_name][service_version].nil? ||
-           Time.now - refreshed_times[service_name][service_version] > 5.seconds)
-
-          do_refresh(service_name, service_version, endpoint_class)
-        end
-      end
-
-      # get the lookup table entries and ping them, store responsive ones
-      def do_refresh(service_name, service_version, endpoint_class)
-        begin
-          @refreshing = true
-          results = CgLookupClient::Entry.lookup(service_name, service_version)
-          if results.nil? || results.compact.blank?
-            raise ServiceUnavailableError, "No #{service_name} services are available."
-          end
-          to_ping = results.compact.map do |result|
-            endpoint_class.constantize.new(service_name, result[:entry].uri, service_version)
-          end
-          live_endpoints = to_ping.select {|endpoint| endpoint.ping }
-          if live_endpoints.blank?
-            raise ServiceUnavailableError, "No #{service_name} services are available."
-          else
-            endpoints[service_name][service_version] = live_endpoints
-            refreshed_times[service_name][service_version] = Time.now
-          end
-        ensure
-          @refreshing = false
-        end
-      end
-
-    end
+    include CgLookupClient::UriWithVersion
 
     REQUEST_TIMEOUT = 10000 # milliseconds
 
-    attr_reader :name, :uri, :version
+    attr_reader :name
 
     def initialize(name, uri, version)
       @name = name
-      @uri = uri
-        # ensure trailing slash on uri
-      @uri << '/' if @uri[-1].chr != '/'
-        # to_s in case a number is passed in
-      @version = version.to_s
+      set_uri_and_version(uri, version)
       @cache = CgServiceClient::Cache.new
     end
 
-    def uri_with_version
-      @uri + 'v' + @version + "/"
-    end
-
-    def eql?(object)
-      if object.equal?(self)
-        return true
-      elsif !self.class.equal?(object.class)
-        return false
-      end
-
-      object.uri_with_version.eql?(uri_with_version)
-    end
-
-    def hash
-      uri_with_version.hash
-    end
-
+    # Ping the service referenced by this endpoint.
+    #
+    # @return [Boolean] true if the service responded to the ping
     def ping
       begin
         self.run_request(uri_with_version + 'ping/?',
@@ -113,10 +31,6 @@ module CgServiceClient
       rescue
         nil
       end
-    end
-
-    def refresh
-      CgServiceClient::RestEndpoint.refresh(@name, @version, self.class.to_s)
     end
 
     protected
@@ -149,7 +63,6 @@ module CgServiceClient
                    end
       end
 
-      #refreshed_count = 0
       if response.nil?
         begin
           request_options[:timeout] ||= REQUEST_TIMEOUT
@@ -167,15 +80,9 @@ module CgServiceClient
           end
         rescue RestClient::RequestTimeout => e
           raise CgServiceClient::Exceptions::TimeoutError.new(nil, nil), "Request for #{request_url} timed out."
-        rescue Errno::ECONNREFUSED => e
-          #refreshed_count += 1
-          refresh
-          #once logger is defined for the services
-          #logger.error "\n\n\n\n\n\n>>>>>>>>>> #{@name} service refused connection #{refreshed_count} time#{refreshed_count > 1 ? 's' : ''}"
-          #only retry an arbitrary number of times to protect against infinite loop.
-          #retry if refreshed_count <= 2
-          #refresh raised an error if it could not produce a good endpoint,
-          #so should only get here if the next endpoint it found went down between the ping and our retried request
+        rescue Errno::ECONNREFUSED
+          # FIXME: not needed if #with_endpoint is used in all service clients
+          CgLookupClient::ENDPOINTS.refresh(self.class, name, version)
           raise
         end
       end

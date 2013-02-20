@@ -1,6 +1,8 @@
 require 'cg_lookup_client'
 
 module CgServiceClient
+  class ServiceUnavailableError < StandardError; end
+
   # This mixin provides convenience methods for instantiating and renewing service endpoints.
   # To use this mixin, include the following at the beginning of your class:
   # extend CgServiceClient::Serviceable
@@ -9,26 +11,43 @@ module CgServiceClient
   module Serviceable
     ENDPOINT_FLUSH_INTERVAL_IN_SEC = 60
 
-    # Looks up the given service and instantiates the given RestEndpoint.
-    # Makes available a class instance variable, @endpoint, that can be
-    # used to interact with the endpoint. The endpoint will be periodically
-    # refreshed.
+    # Define the service that this class uses.  Calls to the class
+    # method {.endpoint} will lookup the endpoint in the global
+    # CgLookupClient::ENDPOINTS, which handles caching, refreshing,
+    # etc.
     def uses_service(service_name, service_version, endpoint_class)
       @service_name = service_name
       @service_version = service_version
       @endpoint_class = endpoint_class
     end
 
-    # CP-1912  CgServiceClient::RestEndpoint manages the relationship with lookup client,
-    # and maintains a pool of endpoints for all the services on all the node agents
-    # this way when any class notices a bad endpoint it can be refreshed for all classes
+    # Forward to CgLookupClient::CachingEndpointSet#with_endpoint
+    # using the globally shared CgLookupClient::ENDPOINTS.  The block
+    # may be invoked two or more times if the endpoint fails with
+    # ECONNREFUSED.
+    #
+    # See CP-1912, CP-2758
+    #
+    # @see CgLookupClient::CachingEndpointSet#with_endpoint
+    # @raises ServiceUnavailableError (rather than CgLookupClient::NotFoundError)
+    def with_endpoint(opts = {}, &block)
+      CgLookupClient::ENDPOINTS.with_endpoint(@endpoint_class,
+                                              @service_name,
+                                              @service_version,
+                                              opts,
+                                              &block)
+    rescue CgLookupClient::NotFoundError => e
+      raise ServiceUnavailableError, e.message
+    end
+
+    # Get the endpoint, possibly looking it up from a lookup service,
+    # according to the configuration in {#uses_service}.
+    #
+    # See CP-1912, CP-2758
     def endpoint
-      ep = CgServiceClient::RestEndpoint.get(@service_name, @service_version, @endpoint_class)
-      if ep.nil?
-        raise CgServiceClient::ServiceUnavailableError
-      else
-        ep
-      end
+      CgLookupClient::ENDPOINTS.get(@endpoint_class, @service_name, @service_version)
+    rescue CgLookupClient::NotFoundError => e
+      raise ServiceUnavailableError, e.message
     end
   end
 end
