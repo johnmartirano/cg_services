@@ -1,5 +1,6 @@
 require 'active_model'
 require 'aspect4r'
+require 'cg_role_client/rest_endpoint'
 require 'cg_service_client'
 
 module CgRoleClient
@@ -9,7 +10,7 @@ module CgRoleClient
   class RoleType
     include CgServiceClient::Base
 
-    uses_service("Role", "1", "CgRoleClient::RestEndpoint")
+    uses_service("Role", "1", CgRoleClient::RestEndpoint)
 
     serializable_attr_accessor :id, :role_name, :target_type, :created_at, :updated_at
 
@@ -18,19 +19,19 @@ module CgRoleClient
 
     class << self
       def all
-        try_service_call do
+        with_endpoint do |endpoint|
           endpoint.find_all_role_types
         end
       end
 
       def find(id)
-        try_service_call do
+        with_endpoint do |endpoint|
           endpoint.find_role_type_by_id(id)
         end
       end
 
       def find_by_role_name_and_target_type(role_name, target_type)
-        try_service_call do
+        with_endpoint do |endpoint|
           endpoint.find_role_type_by_role_name_and_target_type(role_name, target_type)
         end
       end
@@ -51,7 +52,7 @@ module CgRoleClient
     end
 
     def activities
-      try_service_call do
+      with_endpoint do |endpoint|
         endpoint.find_role_type_activities_by_role_type_id(@id)
       end
     end

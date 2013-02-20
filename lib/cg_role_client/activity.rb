@@ -1,4 +1,5 @@
 require 'active_model'
+require 'cg_role_client/rest_endpoint'
 require 'cg_service_client'
 
 module CgRoleClient
@@ -14,7 +15,7 @@ module CgRoleClient
 
     serializable_attr_accessor :id, :code, :name, :created_at, :updated_at
 
-    uses_service("Role", "1", "CgRoleClient::RestEndpoint")
+    uses_service("Role", "1", CgRoleClient::RestEndpoint)
 
     class << self
       # Enables activities to be found using statements

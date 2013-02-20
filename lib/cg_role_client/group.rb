@@ -1,5 +1,6 @@
 require 'active_model'
 require 'aspect4r'
+require 'cg_role_client/rest_endpoint'
 require 'cg_service_client'
 
 module CgRoleClient
@@ -7,7 +8,7 @@ module CgRoleClient
   class Group
     include CgServiceClient::Base
 
-    uses_service("Role", "1", "CgRoleClient::RestEndpoint")
+    uses_service("Role", "1", CgRoleClient::RestEndpoint)
 
     serializable_attr_accessor :id, :code, :name, :created_at, :updated_at
 
@@ -15,17 +16,15 @@ module CgRoleClient
 
     class << self
       def create(attributes = {})
-        try_service_call do
-          group = CgRoleClient::Group.new(attributes)
-          if !group.valid? || !group.id.nil?
-            return false
-          end
-          endpoint.create_group(group)
+        group = CgRoleClient::Group.new(attributes)
+        if !group.valid? || !group.id.nil?
+          return false
         end
+        with_endpoint {|endpoint| endpoint.create_group(group) }
       end
 
       def find_by_code(group_code)
-        try_service_call do
+        with_endpoint do |endpoint|
           endpoint.find_group_by_code(group_code)
         end
       end
@@ -37,20 +36,20 @@ module CgRoleClient
 
     def add(user)
       raise "TypeError: add no longer accepts an actor as the parameter" if user.is_a? CgRoleClient::Actor
-      try_service_call do
+      with_endpoint do |endpoint|
         endpoint.add_actor_to_group(@id, user)
       end
     end
 
     def remove(user)
       raise "TypeError: remove no longer accepts an actor as the parameter" if user.is_a? CgRoleClient::Actor
-      try_service_call do
+      with_endpoint do |endpoint|
         endpoint.remove_actor_from_group(@id, user)
       end
     end
 
     def actors
-      try_service_call do
+      with_endpoint do |endpoint|
         endpoint.find_group_actors_by_group_id(@id)
       end
     end
@@ -58,7 +57,7 @@ module CgRoleClient
     # Might be needed later
 =begin
     def roles
-      try_service_call do
+      with_endpoint do |endpoint|
         endpoint.find_group_roles_by_group_id
       end
     end
