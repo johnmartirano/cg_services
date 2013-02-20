@@ -1,22 +1,17 @@
 require 'rest-client'
 require 'active_record'
 
+require 'cg_lookup_client/uri_with_version'
+
 module CgLookupClient
   class RestEndpoint
-
-    attr_reader :uri, :version
-
+    include UriWithVersion
+    
     def initialize(uri, version)
-      @uri = uri
-      # ensure trailing slash on uri
-      @uri << '/' if @uri[-1].chr != '/'
-      # to_s in case a number is passed in
-      @version = version.to_s
+      set_uri_and_version(uri, version)
     end
 
-    def uri_with_version
-      @uri + 'v' + @version + "/"
-    end
+    alias :to_s :uri_with_version
 
     def register(entry)
       # TODO replace the following comment with a real log statement
@@ -63,20 +58,6 @@ module CgLookupClient
         lookup_results << {:entry=>nil, :message=>error.to_s}
       end
       lookup_results
-    end
-
-    def eql?(object)
-      if object.equal?(self)
-        return true
-      elsif !self.class.equal?(object.class)
-        return false
-      end
-
-      object.uri_with_version.eql?(uri_with_version)
-    end
-
-    def hash
-      uri_with_version.hash
     end
   end
 end
