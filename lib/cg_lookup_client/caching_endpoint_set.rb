@@ -30,6 +30,16 @@ module CgLookupClient
 
     # object used as cache key
     Key = Struct.new(:endpoint_class, :type, :version)
+    class Key
+      def initialize(*args)
+        super(*args)
+        freeze
+      end
+
+      def to_s
+        "#{type}-v#{version}(#{endpoint_class})"
+      end
+    end
 
     attr_reader :refresh_period
 
@@ -134,10 +144,13 @@ module CgLookupClient
     # out by #get.  A periodic refresh may restore the endpoint if it
     # responds to ping.
     def evict!(bad_endpoint)
+      key = make_key(bad_endpoint.class, bad_endpoint.name, bad_endpoint.version)
       synchronize do
-        key = make_key(bad_endpoint.class, bad_endpoint.name, bad_endpoint.version)
         if endpoints = cache_get(key)
+          logger.warn { "evicting bad endpoint #{bad_endpoint} (#{key})" }
           endpoints.delete(bad_endpoint)
+        else
+          logger.warn { "not evicting bad endpoint #{bad_endpoint} because nothing cached for #{key}" }
         end
       end
     end
@@ -162,7 +175,7 @@ module CgLookupClient
     # @param [String] type
     # @param [String] version
     def make_key(endpoint_class, type, version)
-      Key.new(endpoint_class, type, version).freeze
+      Key.new(endpoint_class, type, version)
     end
 
     # Get the value corresponding to +key+ from the cache.  If it is
@@ -186,8 +199,12 @@ module CgLookupClient
           
           data.value
         elsif block_given?
+          logger.info { "nothing in cache for #{key} (#{data.inspect})" }
           data = cache_put(key, yield(key.endpoint_class, key.type, key.version))
           data.value
+        else
+          logger.warn { "nothing in cache for #{key} (#{data.inspect}) and no block given" }
+          nil
         end
       end
     end
