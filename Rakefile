@@ -5,8 +5,8 @@ ENV['BUNDLE_GEMFILE'] ||= File.expand_path('../Gemfile', __FILE__)
 require 'bundler/setup' if File.exists?(ENV['BUNDLE_GEMFILE'])
 
 require 'cg_service'
+require 'warbler'
 
 CgService::RakeLoader.load_tasks!
 
-load 'cg_tasks/deploy_jruby.rake'
-
+Warbler::Task.new
