@@ -32,9 +32,9 @@ module CgRoleClient
         end
       end
 
-      def find_with_roles_on_target(target_id, target_type)
+      def find_with_roles_on_target(target_id, target_type, role_name = nil)
         with_endpoint do |endpoint|
-          endpoint.find_with_roles_on_target(target_id, target_type)
+          endpoint.find_with_roles_on_target(target_id, target_type, role_name)
         end
       end
 

@@ -231,10 +231,10 @@ module CgRoleClient
       end
     end
 
-    def  find_with_roles_on_target(target_id, target_type)
+    def  find_with_roles_on_target(target_id, target_type, role_name)
       request_url = uri_with_version + "actors/with_roles_on_target/"
 
-      request_options = {:params  => {:target_type => target_type, :target_id => target_id},
+      request_options = {:params  => {:target_type => target_type, :target_id => target_id, :role_name => role_name},
                          :method => :get,
                          :headers => {"Accept" => "application/json"},
                          :timeout => REQUEST_TIMEOUT}
