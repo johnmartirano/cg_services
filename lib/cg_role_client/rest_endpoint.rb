@@ -131,7 +131,6 @@ module CgRoleClient
                            :actor_type => acting_entity.class.name,
                            :target_type => target_type, 
                            :target_id => target_id},
-                         :cache_timeout => CACHE_SHORT, 
                          :timeout => REQUEST_TIMEOUT}
 
       roles = []
