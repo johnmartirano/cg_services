@@ -1,4 +1,5 @@
 require 'cg_lookup_client'
+require 'request_store'
 
 module CgServiceClient
 
@@ -36,7 +37,51 @@ module CgServiceClient
     protected
 
     def run_request(request_url, request_options = {}, options = {}, &block)
-      run_rest_client_request(request_url, request_options, options, &block)
+      options = {:only_cache_200s => true}.merge(options)
+
+      if cacheable_request?(request_options)
+        key = rest_client_cache_key(request_url, request_options[:params])
+        
+        response = request_store_get(key) || shared_store_get(key)
+        unless response
+          response = run_rest_client_request(request_url, request_options)
+
+          # any response to GET goes into the per-request store
+          if cacheable_request?(request_options)
+            request_store_put(key, response)
+          end
+
+          # only 'good' responses go into the shared cache
+          if cacheable_response?(request_options, options, response)
+            shared_store_put(key, response, request_options[:cache_timeout])
+          end
+        end
+      else
+        # any non-cacheable request (e.g. PUT, POST), clears out the
+        # pre-request store under the assumption that, e.g., role
+        # service roles have been modified
+        request_store_clear!
+        response = run_rest_client_request(request_url, request_options)
+      end
+
+      if (200..299).include?(response.code)
+        yield response
+      elsif (400..499).include?(response.code)
+        raise(CgServiceClient::Exceptions::ClientError.new(response.code, response.description),
+              "Client error #{response.code}: #{response.body}.")
+      elsif response.code >= 500
+        raise(CgServiceClient::Exceptions::ServerError.new(response.code, response.description),
+              "Server error #{response.code}: #{response.body}.")
+      elsif response.code == 0
+        # no http response
+        raise(CgServiceClient::Exceptions::ConnectionError.new(response.code, response.description),
+              response.description)
+        #elsif response.timed_out?
+        #  raise CgServiceClient::Exceptions::TimeoutError.new(response.code, response.curl_error_message), "Request for #{request_url} timed out."
+      else
+        raise(CgServiceClient::Exceptions::ConnectionError.new(response.code, response.body),
+              "Request for #{request_url} failed.")
+      end
     end
 
     def rest_client_cache_key(url, params = nil)
@@ -47,69 +92,67 @@ module CgServiceClient
       end
     end
 
-    def run_rest_client_request(request_url, request_options = {}, options = {}, &block)
-      options = {:only_cache_200s => true}.merge(options)
-      
-      if request_options[:method] == :get
-        response = begin
-                     @cache.get(rest_client_cache_key(request_url, request_options[:params]))
-                   rescue => e
-                     # FIXME: this rescue should not be necessary...
-                     # Better would be to use a logger to log a
-                     # message perhaps?  This is here just as a last
-                     # resort.
-                     puts "ERROR: #{e} cache lookup failed for #{request_url}, #{request_options[:params]}"
-                     nil
-                   end
-      end
-
-      if response.nil?
-        begin
-          request_options[:timeout] ||= REQUEST_TIMEOUT
-          timeout = (request_options[:timeout] / 1000)
-          params = request_options[:params]
-          request_options[:headers].merge!({:params => request_options.delete(:params)}) if request_options[:params]
-          request = RestClient::Request.new({:url => request_url,
-                                             :method => request_options[:method],
-                                             :headers => request_options[:headers],
-                                             :payload => request_options[:body],
-                                             :timeout => timeout})
-          response = request.execute
-          if (response.code >= 200 && response.code < 300 && request_options[:method] == :get && request_options[:cache_timeout] && cacheable?(response, options))
-            @cache.set(rest_client_cache_key(request_url, params), response, request_options[:cache_timeout])
-          end
-        rescue RestClient::RequestTimeout => e
-          raise CgServiceClient::Exceptions::TimeoutError.new(nil, nil), "Request for #{request_url} timed out."
-        rescue Errno::ECONNREFUSED
-          # FIXME: not needed if #with_endpoint is used in all service clients
-          CgLookupClient::ENDPOINTS.refresh(self.class, name, version)
-          raise
-        end
-      end
-
-      ret = nil
-      if (response.code >= 200 && response.code < 300)
-        ret = yield response
-      elsif response.code >= 400 && response.code < 500
-        raise CgServiceClient::Exceptions::ClientError.new(response.code, response.description), "Client error #{response.code}: #{response.body}."
-      elsif response.code >= 500
-        raise CgServiceClient::Exceptions::ServerError.new(response.code, response.description), "Server error #{response.code}: #{response.body}."
-      elsif response.code == 0
-        # no http response
-        raise CgServiceClient::Exceptions::ConnectionError.new(response.code, response.description), response.description
-      #elsif response.timed_out?
-      #  raise CgServiceClient::Exceptions::TimeoutError.new(response.code, response.curl_error_message), "Request for #{request_url} timed out."
-      else
-        raise CgServiceClient::Exceptions::ConnectionError.new(response.code, response.body), "Request for #{request_url} failed."
-      end
-      
-      ret
+    def cacheable_request?(request_options)
+      [:get, :head].include?(request_options[:method])
     end
-    
-    def cacheable?(response, options)
-      !options[:only_cache_200s] ||
-          (options[:only_cache_200s] && response.code >= 200 && response.code < 300)
+
+    # Just checks the status code is 2xx if options[:only_cache_200s]
+    def good_to_cache?(response, options)
+      options[:only_cache_200s] ? (200..299).include?(response.code) : true
+    end
+
+    def cacheable_response?(request_options, options, response)
+      (request_options[:cache_timeout] &&
+       cacheable_request?(request_options) &&
+       good_to_cache?(response, options))
+    end
+
+    def request_store_get(key)
+      (RequestStore.store[:cg_service_client] ||= {})[key]
+    end
+
+    def request_store_put(key, value)
+      (RequestStore.store[:cg_service_client] ||= {})[key] = value
+    end
+
+    def request_store_clear!
+      hash = RequestStore.store[:cg_service_client]
+      hash && hash.clear
+    end
+
+    def shared_store_get(key)
+      begin
+        @cache.get(key)
+      rescue => e
+        # FIXME: this rescue should not be necessary...  Better would
+        # be to use a logger to log a message perhaps?  This is here
+        # just as a last resort.
+        puts "ERROR: #{e} cache lookup failed for #{request_url}, #{request_options[:params]}"
+        nil
+      end
+    end
+
+    def shared_store_put(key, value, timeout)
+      @cache.set(key, value, timeout)
+    end
+
+    def run_rest_client_request(request_url, request_options = {})
+      request_options[:timeout] ||= REQUEST_TIMEOUT
+      timeout = (request_options[:timeout] / 1000)
+      params = request_options[:params]
+      request_options[:headers].merge!({:params => request_options.delete(:params)}) if request_options[:params]
+      request = RestClient::Request.new({:url => request_url,
+                                          :method => request_options[:method],
+                                          :headers => request_options[:headers],
+                                          :payload => request_options[:body],
+                                          :timeout => timeout})
+      request.execute
+    rescue RestClient::RequestTimeout => e
+      raise CgServiceClient::Exceptions::TimeoutError.new(nil, nil), "Request for #{request_url} timed out."
+    rescue Errno::ECONNREFUSED
+      # FIXME: not needed if #with_endpoint is used in all service clients
+      CgLookupClient::ENDPOINTS.refresh(self.class, name, version)
+      raise
     end
   end
-
 end

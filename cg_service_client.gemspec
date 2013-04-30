@@ -11,11 +11,13 @@ Gem::Specification.new do |s|
 
   s.set_parent 'scholar'
 
-  s.add_dependency "rake"
-  s.add_dependency "rspec"
   s.add_dependency "activemodel"
   s.add_dependency "activesupport"
   s.add_dependency "cg_lookup_client", "~> 0.5.16"
+  s.add_dependency "request_store"
+
+  s.add_development_dependency "rake"
+  s.add_development_dependency "rspec"
 
   s.files        = Dir.glob("{lib,spec}/**/*")
 
