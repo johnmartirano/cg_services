@@ -47,9 +47,7 @@ module CgServiceClient
           response = run_rest_client_request(request_url, request_options)
 
           # any response to GET goes into the per-request store
-          if cacheable_request?(request_options)
-            request_store_put(key, response)
-          end
+          request_store_put(key, response)
 
           # only 'good' responses go into the shared cache
           if cacheable_response?(request_options, options, response)
