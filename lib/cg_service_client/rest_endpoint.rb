@@ -36,6 +36,12 @@ module CgServiceClient
 
     protected
 
+    # Instrument for timing etc.  See initializer in cg_community.
+    # May want to make these available in all apps.
+    def instrument(hash, &block)
+      ActiveSupport::Notifications.instrument('service_call.cgservice', hash, &block)
+    end
+
     def run_request(request_url, request_options = {}, options = {}, &block)
       options = {:only_cache_200s => true}.merge(options)
 
@@ -43,9 +49,13 @@ module CgServiceClient
         key = rest_client_cache_key(request_url, request_options[:params])
         
         response = request_store_get(key) || shared_store_get(key)
-        unless response
-          response = run_rest_client_request(request_url, request_options)
-
+        if response
+          instrument(:url => request_url, :params => request_options[:params], :cached => true)
+        else
+          instrument(:url => request_url, :params => request_options[:params], :cached => false) do
+            response = run_rest_client_request(request_url, request_options)
+          end
+          
           # any response to GET goes into the per-request store
           request_store_put(key, response)
 
@@ -59,7 +69,9 @@ module CgServiceClient
         # pre-request store under the assumption that, e.g., role
         # service roles have been modified
         request_store_clear!
-        response = run_rest_client_request(request_url, request_options)
+        instrument(:url => request_url, :params => request_options[:params], :cached => :not_cacheable) do
+          response = run_rest_client_request(request_url, request_options)
+        end
       end
 
       if (200..299).include?(response.code)
