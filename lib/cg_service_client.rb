@@ -6,3 +6,6 @@ require 'cg_service_client/cache'
 require 'cg_service_client/rest_client_patch'
 require 'cg_service_client/logger'
 require 'cg_service_client/base'
+
+require 'cg_service_client/log_subscriber'
+require 'cg_service_client/controller_runtime'
