@@ -69,7 +69,7 @@ module CgServiceClient
         # pre-request store under the assumption that, e.g., role
         # service roles have been modified
         request_store_clear!
-        instrument(:url => request_url, :params => request_options[:params], :cached => :not_cacheable) do
+        instrument(:url => request_url, :params => request_options[:params], :cached => nil) do
           response = run_rest_client_request(request_url, request_options)
         end
       end
