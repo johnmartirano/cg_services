@@ -43,7 +43,7 @@ module CgServiceClient
     end
 
     def self.reset!
-      runtime = 0
+      self.runtime = 0
       counts.clear
     end
   end
