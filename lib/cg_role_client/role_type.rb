@@ -53,7 +53,8 @@ module CgRoleClient
 
     def activities
       with_endpoint do |endpoint|
-        endpoint.find_role_type_activities_by_role_type_id(@id)
+        return @role_type_activities if defined? @role_type_activities
+        @role_type_activities = endpoint.find_role_type_activities_by_role_type_id(@id)
       end
     end
   end
