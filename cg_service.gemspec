@@ -35,7 +35,7 @@ Gem::Specification.new do |s|
   def s.java!
     self.platform = 'java'
     add_dependency 'activerecord-jdbc-adapter', '1.2.2.20120613'
-    add_dependency 'activerecord-jdbcpostgresql-adapter'
+#    add_dependency 'activerecord-jdbcpostgresql-adapter'
     add_dependency 'jruby-openssl'
     remove_dependencies 'pg', 'thin'
     self
