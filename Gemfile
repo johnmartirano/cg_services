@@ -1,8 +1,8 @@
 source 'http://rubygems.org'
 source 'http://build.commongroundpublishing.com/gems'
 
-gem 'cg_service', '~> 0.7.19'
-# gem 'cg_service', :path => '../cg_service'
+#gem 'cg_service', '~> 0.7.19'
+gem 'cg_service', :path => '../cg_service'
 
 if RUBY_PLATFORM =~ /java/
 #  gem 'activerecord-jdbcpostgresql-adapter'
