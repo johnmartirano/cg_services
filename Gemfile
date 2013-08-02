@@ -5,7 +5,8 @@ gem 'cg_service', '~> 0.7.19'
 # gem 'cg_service', :path => '../cg_service'
 
 if RUBY_PLATFORM =~ /java/
-  gem 'activerecord-jdbcpostgresql-adapter'
+#  gem 'activerecord-jdbcpostgresql-adapter'
+  gem "activerecord-jdbcsqlite3-adapter"
   gem 'jruby-openssl'
 end
 
