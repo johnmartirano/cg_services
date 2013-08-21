@@ -37,8 +37,8 @@ module CgRoleClient
       end
 
       def method_missing(sym, *args, &block)
-        logger.warn "CgRoleClient::RoleType.role_type('target_type') is deprecated, use CgRoleClient::RoleType.get(:role_type, 'target_type')"
-        logger.warn "Called by #{caller.first}"
+        Rails.logger.warn "CgRoleClient::RoleType.role_type('target_type') is deprecated, use CgRoleClient::RoleType.get(:role_type, 'target_type')"
+        Rails.logger.warn "Called by #{caller.first}"
         self.find(sym.to_s, *args)
       end
 

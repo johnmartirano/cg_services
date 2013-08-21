@@ -21,8 +21,8 @@ module CgRoleClient
       # Enables activities to be found using statements
       # such as, Activity.read, Activity.write, etc.
       def method_missing(sym, *args, &block)
-        logger.warn "CgRoleClient::Activity.activity is deprecated, use CgRoleClient::Activity[:activity]"
-        logger.warn "Called by #{caller.first}"
+        Rails.logger.warn "CgRoleClient::Activity.activity is deprecated, use CgRoleClient::Activity[:activity]"
+        Rails.logger.warn "Called by #{caller.first}"
         self[sym]
       end
 
@@ -37,8 +37,8 @@ module CgRoleClient
           @cache ||= {}
           @cache[sym.to_s] ||= endpoint.find_activity_by_code(sym.to_s)
         rescue Exception => e
-          logger.error e
-          logger.error e.backtrace.join("\n\t")
+          Rails.logger.error e
+          Rails.logger.error e.backtrace.join("\n\t")
           raise
         end
       end
