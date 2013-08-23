@@ -272,7 +272,11 @@ module CgRoleClient
           targets = decoded_targets.map { |target_attributes| CgRoleClient::Target.new(target_attributes) }
         end
       rescue ::CgServiceClient::Exceptions::ClientError => e
-        raise unless e.http_code == 404
+        if e.http_code == 404
+          targets
+        else
+          raise
+        end
       end
     end
 
