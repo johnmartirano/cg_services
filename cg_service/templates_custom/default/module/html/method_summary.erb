@@ -1,0 +1,24 @@
+<% if method_listing.size > 0 %>
+  <% groups(method_listing) do |list, name| %>
+    <% if name == 'Instance Method Summary' %>
+      <table>
+        <caption>Some API <%= name %></caption>
+        <thead>
+          <th>Method</th>
+          <th>URI</th>
+          <th>URI params</th>
+          <th>Request Params</th>
+          <th>Request Body</th>
+          <th>Response Body</th>
+          <th class="tableHeaderLast">Description</th>
+        </tr>
+        <tbody>
+            <% list.sort{|a,b| oa = a[:sort_order] || 0; ob = b[:sort_order] || 0; oa <=> ob}.each do |meth| %>
+            <%= yieldall :item => meth %>
+          <% end %>
+        </tbody>
+        </thead>
+      </table>
+    <% end %>
+  <% end %>
+<% end %>
