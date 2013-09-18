@@ -1,0 +1,111 @@
+  <h2>CG Lookup Service</h2>
+
+  <p>Stores the names and locations of resources across the network. Provides
+    lookup methods for registry entries, which enables runtime resource
+    discovery and late binding.</p>
+
+  <p>When a resource registers itself with the lookup service,
+    the lookup service considers it valid for a finite period of time called the
+    "lease" period. Every resource must renew their lease before the lease
+    period expires or else the lookup service will remove the entry from the
+    registry.</p>
+
+  <h3>API</h3>
+
+  <table>
+    <caption>Version 1</caption>
+    <thead>
+    <tr>
+      <th>Method</th>
+      <th>URI</th>
+      <th>Request Params</th>
+      <th>Request Body</th>
+      <th>Response Body</th>
+      <th class="tableHeaderLast">Description</th>
+    <tr>
+    </thead>
+    <tbody>
+    <tr>
+      <td>GET</td>
+      <td>/v1/entries</td>
+      <td>None</td>
+      <td>None</td>
+      <td>JSON Entry[]</td>
+      <td>Look up all registry entries.</td>
+    <tr>
+    <tr>
+      <td>GET</td>
+      <td>/v1/entries/{type}</td>
+      <td>None</td>
+      <td>None</td>
+      <td>JSON Entry[]</td>
+      <td>Look up all registry entries of a certain type.</td>
+    <tr>
+    <tr>
+      <td>POST</td>
+      <td>/v1/entries</td>
+      <td>None</td>
+      <td>JSON Entry</td>
+      <td>JSON Entry</td>
+      <td>Register a new or renew an existing entry.</td>
+    <tr>
+    <tr>
+      <td>DELETE</td>
+      <td>/v1/entries/{id}</td>
+      <td>None</td>
+      <td>None</td>
+      <td>JSON Entry</td>
+      <td>Remove an entry from the registry.</td>
+    <tr>
+    </tbody>
+  </table>
+
+  <h3>Models</h3>
+
+  <table>
+    <caption>Entry</caption>
+    <thead>
+    <tr>
+      <th>Attribute</th>
+      <th>Type</th>
+      <th class="tableHeaderLast">Description</th>
+    <tr>
+    </thead>
+    <tbody>
+    <tr>
+      <td>id</td>
+      <td>Integer</td>
+      <td>Unique ID of the entry.</td>
+    <tr>
+    <tr>
+      <td>type_name</td>
+      <td>String</td>
+      <td>Type of the resource.</td>
+    <tr>
+    <tr>
+      <td>description</td>
+      <td>String</td>
+      <td>Description of the resource, including implementation details.</td>
+    <tr>
+    <tr>
+      <td>uri</td>
+      <td>String</td>
+      <td>Location of the resource.</td>
+    <tr>
+    <tr>
+      <td>version</td>
+      <td>String</td>
+      <td>Version of the resource.</td>
+    <tr>
+    <tr>
+      <td>created_at</td>
+      <td>Timestamp</td>
+      <td>Date and time the entry was created.</td>
+    <tr>
+    <tr>
+      <td>updated_at</td>
+      <td>Timestamp</td>
+      <td>Date and time the entry was last renewed.</td>
+    <tr>
+    </tbody>
+  </table>

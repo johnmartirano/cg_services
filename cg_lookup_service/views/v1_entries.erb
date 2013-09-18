@@ -1,0 +1,31 @@
+  <h2>Entries</h2>
+
+  <table>
+    <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+      <th>URI</th>
+      <th>Version</th>
+      <th class="tableHeaderLast">Updated</th>
+    <tr>
+    </thead>
+    <tbody>
+    <% @entries.each do |entry| %>
+    <tr>
+      <td><%= entry.type_name %></td>
+      <td><%= entry.description %></td>
+      <td><a href="<%= entry.uri + "v#{entry.version}/doc" %>"><%= entry.uri %></a></td>
+      <td><%= entry.version %></td>
+      <td><%= entry.updated_at.time_ago_in_words %></td>
+    </tr>
+    <% end %>
+    <% if @entries.empty? %>
+    <tr>
+      <td colspan="4">No entries are registered.</td>
+    </tr>
+    <% end %>
+    </tbody>
+  </table>
+
+  <p style="color:#888;font-size:10px">generated <%= Time.now.utc %></p>
