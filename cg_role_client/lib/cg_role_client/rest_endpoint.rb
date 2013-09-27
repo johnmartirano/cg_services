@@ -1,3 +1,4 @@
+#typhoeus was replaced to support JRuby
 #require 'typhoeus'
 require 'active_record'
 require 'cg_service_client'
